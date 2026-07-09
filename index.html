@@ -22,13 +22,14 @@
   --r:10px;--rs:6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;line-height:1.5}
 
-/* HEADER */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 20px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:100}
-header h1{font-size:17px;font-weight:500;letter-spacing:-.3px}
-header p{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
-.dose-badge{background:var(--pill-soft);color:var(--pill);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:5px 10px;border-radius:20px;border:1px solid #D9D0EE;white-space:nowrap;cursor:pointer;position:relative;flex-shrink:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
+.header-left h1{font-size:17px;font-weight:500;letter-spacing:-.3px}
+.header-meta{display:flex;align-items:center;gap:8px;margin-top:2px}
+.header-meta span{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.streak-badge{background:var(--peak-soft);color:var(--peak);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;border:1px solid #E8D89A;white-space:nowrap}
+.dose-badge{background:var(--pill-soft);color:var(--pill);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:5px 10px;border-radius:20px;border:1px solid #D9D0EE;white-space:nowrap;cursor:pointer;position:relative;flex-shrink:0}
 .dose-popup{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.10);min-width:180px}
 .dose-popup.open{display:block}
 .dose-popup label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:8px}
@@ -37,34 +38,40 @@ header p{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margi
 .dose-popup span{font-size:13px;color:var(--muted)}
 .dose-popup button{margin-top:10px;width:100%;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:8px;cursor:pointer}
 
-/* NAV */
-nav{display:flex;gap:4px;padding:10px 14px;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);scrollbar-width:none}
+nav{display:flex;gap:4px;padding:10px 14px;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);scrollbar-width:none;position:sticky;top:57px;z-index:99}
 nav::-webkit-scrollbar{display:none}
-nav button{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);background:none;border:1px solid transparent;border-radius:20px;padding:5px 13px;cursor:pointer;white-space:nowrap;transition:all .15s}
+nav button{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--muted);background:none;border:1px solid transparent;border-radius:20px;padding:5px 13px;cursor:pointer;white-space:nowrap;transition:all .15s}
 nav button.active{background:var(--text);color:#fff;border-color:var(--text)}
 
-/* MAIN */
+/* QUICK LOG */
+.quick-log-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:none}
+.quick-log-bar.open{display:block}
+.ql-title{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.ql-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ql-item label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px}
+.ql-item label span{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent)}
+.ql-row{display:flex;gap:8px;align-items:center}
+.ql-note{font-family:'DM Sans',sans-serif;font-size:14px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 10px;border-radius:var(--rs);flex:1;outline:none}
+.ql-save{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:8px 14px;cursor:pointer;white-space:nowrap}
+
 main{padding:14px;max-width:600px;margin:0 auto}
 .view{display:none}.view.active{display:block}
 
-/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
 .card.peak-card{border-color:var(--peak);background:var(--peak-soft)}
 .card.rebound-card{border-color:var(--rebound);background:var(--rebound-soft)}
-.card-title{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:13px;font-family:'DM Mono',monospace}
-.peak-card .card-title{color:var(--peak)}
-.rebound-card .card-title{color:var(--rebound)}
+.card-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:13px;font-family:'DM Mono',monospace}
+.peak-card .card-title{color:var(--peak)}.rebound-card .card-title{color:var(--rebound)}
 
-/* FIELDS */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
-.field-label{font-size:12px;color:var(--muted);margin-bottom:4px}
-.field-input{font-family:'DM Sans',sans-serif;font-size:14px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:8px 11px;border-radius:var(--rs);width:100%;outline:none;transition:border-color .15s}
+.field-label{font-size:13px;color:var(--muted);margin-bottom:4px}
+.field-hint{font-size:11px;color:var(--faint);margin-top:3px;line-height:1.4;font-style:italic}
+.field-input{font-family:'DM Sans',sans-serif;font-size:15px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:8px 11px;border-radius:var(--rs);width:100%;outline:none;transition:border-color .15s}
 .field-input:focus{border-color:var(--accent);background:var(--surface)}
 select.field-input{cursor:pointer}
-textarea.field-input{resize:none;min-height:64px;font-size:13px;line-height:1.5}
+textarea.field-input{resize:none;min-height:64px;font-size:14px;line-height:1.5}
 
-/* DATE STRIP */
 .date-strip{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .date-label{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
 input[type="date"].field-input{font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;width:auto}
@@ -72,75 +79,80 @@ input[type="date"].field-input{font-family:'DM Mono',monospace;font-size:13px;cu
 /* SCALES */
 .scale-group{margin-bottom:14px}
 .scale-group:last-child{margin-bottom:0}
-.scale-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
-.scale-label{font-size:13px}
-.scale-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);font-weight:500;min-width:20px;text-align:right}
+.scale-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.scale-label{font-size:14px}
+.scale-val{font-family:'DM Mono',monospace;font-size:14px;color:var(--accent);font-weight:500;min-width:20px;text-align:right}
 .scale-val.empty{color:var(--faint)}
+.scale-hint{font-size:13px;color:#6B6560;font-style:italic;margin-bottom:8px;line-height:1.5}
 input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--border);border-radius:2px;outline:none;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 1px var(--accent);cursor:pointer}
 .peak-card input[type=range]::-webkit-slider-thumb{background:var(--peak);box-shadow:0 0 0 1px var(--peak)}
 .rebound-card input[type=range]::-webkit-slider-thumb{background:var(--rebound);box-shadow:0 0 0 1px var(--rebound)}
-.peak-card .scale-val{color:var(--peak)}
-.rebound-card .scale-val{color:var(--rebound)}
+.peak-card .scale-val{color:var(--peak)}.rebound-card .scale-val{color:var(--rebound)}
 .scale-ticks{display:flex;justify-content:space-between;margin-top:3px}
-.scale-tick{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint)}
+.scale-tick{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint)}
 
-/* TIME POINT LABEL */
-.tp-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--surface-alt)}
-
-/* DIVIDER */
+.tp-label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--surface-alt)}
 .divider{height:1px;background:var(--surface-alt);margin:14px 0}
 
-/* CHIPS */
 .chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.chip{display:flex;align-items:center;gap:7px;padding:8px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:13px;user-select:none;transition:all .12s}
+.chip{display:flex;align-items:center;gap:7px;padding:8px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:14px;user-select:none;transition:all .12s}
 .chip .cdot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex-shrink:0;transition:background .12s}
 .chip.warn-on{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}.chip.warn-on .cdot{background:var(--warn)}
 .chip.accent-on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}.chip.accent-on .cdot{background:var(--accent)}
 .chip.good-on{background:var(--good-soft);border-color:var(--good);color:var(--good)}.chip.good-on .cdot{background:var(--good)}
 .chip.center{justify-content:center;text-align:center;font-size:12px;padding:8px 4px}
 
-/* BUTTONS */
-.btn-save{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:12px;cursor:pointer;flex:1}
-.btn-outline{font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:8px 14px;cursor:pointer}
-.btn-outline.active-outline{background:var(--text);color:#fff;border-color:var(--text)}
-.btn-sm{font-family:'DM Sans',sans-serif;font-size:12px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:5px 12px;cursor:pointer}
+.btn-save{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:12px;cursor:pointer;flex:1}
+.btn-outline{font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:8px 14px;cursor:pointer}
+.btn-sm{font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:5px 12px;cursor:pointer}
 .save-row{display:flex;gap:10px;align-items:center;margin-top:16px}
-.save-status{font-family:'DM Mono',monospace;font-size:11px;color:var(--good);opacity:0;transition:opacity .3s;white-space:nowrap}
+.save-status{font-family:'DM Mono',monospace;font-size:12px;color:var(--good);opacity:0;transition:opacity .3s;white-space:nowrap}
 .save-status.show{opacity:1}
 
 /* HISTORY */
 .entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
 .entry-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;gap:10px}
-.entry-date{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0}
+.entry-date{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;flex-shrink:0}
 .entry-pills{display:flex;gap:5px;flex-wrap:wrap;flex:1}
-.mini-pill{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--surface-alt);color:var(--muted);border:1px solid var(--border);white-space:nowrap}
-.entry-toggle{font-size:11px;color:var(--faint);flex-shrink:0}
+.mini-pill{font-size:11px;padding:2px 7px;border-radius:20px;background:var(--surface-alt);color:var(--muted);border:1px solid var(--border);white-space:nowrap}
+.entry-toggle{font-size:12px;color:var(--faint);flex-shrink:0}
 .entry-body{display:none;padding:0 16px 14px;border-top:1px solid var(--surface-alt)}
 .entry-body.open{display:block}
 .view-edit-row{display:flex;gap:8px;margin:12px 0 14px;align-items:center}
 .entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
-.ef-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);margin-bottom:1px;font-family:'DM Mono',monospace}
-.ef-val{font-size:12px;font-family:'DM Mono',monospace}
-.entry-note{margin-top:8px;padding:9px 11px;background:var(--bg);border-radius:var(--rs);font-size:12px;line-height:1.6;font-style:italic}
+.ef-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);margin-bottom:1px;font-family:'DM Mono',monospace}
+.ef-val{font-size:13px;font-family:'DM Mono',monospace}
+.entry-note{margin-top:8px;padding:9px 11px;background:var(--bg);border-radius:var(--rs);font-size:13px;line-height:1.6;font-style:italic}
 .peak-note{border-left:2px solid var(--peak);background:var(--peak-soft);font-style:normal}
 .rebound-note{border-left:2px solid var(--rebound);background:var(--rebound-soft);font-style:normal}
-.note-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:500;display:block;margin-bottom:2px}
-.btn-delete{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--warn);background:none;border:1px solid var(--warn);border-radius:var(--rs);padding:5px 12px;cursor:pointer;margin-left:auto}
+.note-type{font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:500;display:block;margin-bottom:2px}
+.btn-delete{font-family:'DM Sans',sans-serif;font-size:12px;color:var(--warn);background:none;border:1px solid var(--warn);border-radius:var(--rs);padding:5px 12px;cursor:pointer;margin-left:auto}
+.hist-note-preview{font-size:11px;color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
 
-/* CYCLE CALENDAR */
+/* WEEK SUMMARY */
+.week-summary{background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.ws-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.9px;color:var(--accent);margin-bottom:10px;font-family:'DM Mono',monospace}
+.ws-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.ws-stat{text-align:center}
+.ws-num{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--accent);line-height:1;margin-bottom:2px}
+.ws-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.ws-insights{font-size:13px;color:var(--text);line-height:1.6;border-top:1px solid rgba(74,111,165,.15);padding-top:10px;margin-top:4px}
+.ws-insights li{margin-left:14px;margin-bottom:3px}
+
+/* CYCLE */
 .cycle-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.cycle-month{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+.cycle-month{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
 .cycle-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
 .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px}
-.cal-dayname{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);text-align:center;padding-bottom:4px;text-transform:uppercase}
-.cal-cell{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;border:1px solid transparent;background:var(--bg);color:var(--muted);transition:all .12s;position:relative}
+.cal-dayname{font-family:'DM Mono',monospace;font-size:10px;color:var(--faint);text-align:center;padding-bottom:4px;text-transform:uppercase}
+.cal-cell{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-family:'DM Mono',monospace;border:1px solid transparent;background:var(--bg);color:var(--muted);transition:all .12s;position:relative}
 .cal-cell:hover{border-color:var(--border)}
 .cal-cell.other-month{opacity:.3;cursor:default;pointer-events:none}
 .cal-cell.today{border-color:var(--accent);color:var(--accent);font-weight:600}
-.cal-cell.selected{border-width:2px;border-color:var(--accent)}
+.cal-cell.selected{border-width:2px}
 .cal-cell.phase-menstrual{background:#FDECEA;border-color:#C4704A;color:#C4704A}
 .cal-cell.phase-follicular{background:#E8F4EE;border-color:#4A8A6F;color:#4A8A6F}
 .cal-cell.phase-ovulatory{background:#FBF5E6;border-color:#D4A843;color:#D4A843}
@@ -149,61 +161,129 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .cycle-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .c-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
 .c-stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent);line-height:1;margin-bottom:3px}
-.c-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.cycle-entry-panel{display:none}
-.cycle-entry-panel.open{display:block}
-.sym-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 8px}
+.c-stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.cycle-entry-panel{display:none}.cycle-entry-panel.open{display:block}
+.sym-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 8px}
 
 /* TRENDS */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 12px;text-align:center}
 .stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent);line-height:1;margin-bottom:4px}
-.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.bar-chart{display:flex;align-items:flex-end;gap:3px;height:56px}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.bar-chart{display:flex;align-items:flex-end;gap:3px;height:60px;margin-bottom:4px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
-.bar{width:100%;border-radius:2px 2px 0 0;min-height:2px}
-.bar-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint)}
-.trend-title{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:500;margin-bottom:10px;font-family:'DM Mono',monospace}
-.no-data{font-size:13px;color:var(--faint);font-style:italic;padding:14px 0}
+.bar{width:100%;border-radius:2px 2px 0 0;min-height:2px;position:relative}
+.bar-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint)}
+.trend-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:500;margin-bottom:10px;font-family:'DM Mono',monospace}
+.no-data{font-size:14px;color:var(--faint);font-style:italic;padding:14px 0}
+.phase-bar-dot{width:6px;height:6px;border-radius:50%;position:absolute;bottom:-10px;left:50%;transform:translateX(-50%)}
+.phase-bar-row{display:flex;gap:3px;margin-bottom:8px}
+.phase-bar-seg{flex:1;height:4px;border-radius:2px}
 
-/* HISTORY EMPTY */
-.hist-empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
+.hist-empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:15px;line-height:1.7}
 .hist-empty .big{font-size:28px;display:block;margin-bottom:12px}
+/* SKIP DOSE */
+.skip-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;cursor:pointer;user-select:none;transition:all .15s}
+.skip-toggle.skipped{background:var(--warn-soft);border-color:var(--warn)}
+.skip-toggle-left{display:flex;align-items:center;gap:10px}
+.skip-icon{width:32px;height:32px;border-radius:50%;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.skip-label{font-size:14px;font-weight:500}
+.skip-toggle.skipped .skip-label{color:var(--warn)}
+.skip-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.skip-toggle.skipped .skip-sub{color:var(--warn);opacity:.7}
+.skip-pill{font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;background:var(--surface-alt);color:var(--muted);border:1px solid var(--border)}
+.skip-toggle.skipped .skip-pill{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.skip-reasons{display:none;padding:0 14px 14px;border:1px solid var(--warn);border-top:none;background:var(--warn-soft);border-radius:0 0 var(--r) var(--r);margin-top:-10px;margin-bottom:10px}
+.skip-reasons.open{display:block}
+.skip-reasons-title{font-size:11px;color:var(--warn);text-transform:uppercase;letter-spacing:.6px;padding-top:14px;margin-bottom:10px;font-family:'DM Mono',monospace}
+.skip-reason-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.skip-reason-chip{padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:13px;text-align:center;transition:all .12s;color:var(--text)}
+.skip-reason-chip.selected{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);font-weight:500}
+.meds-dimmed{opacity:.4;pointer-events:none;transition:opacity .2s}
+/* IMPROVED QUICK LOG */
+.ql-scale-block{margin-bottom:14px}
+.ql-scale-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.ql-scale-name{font-size:14px;font-weight:500;color:var(--text)}
+.ql-scale-num{font-family:'DM Mono',monospace;font-size:14px;color:var(--accent);font-weight:500}
+.ql-scale-hint{font-size:11px;color:#6B6560;font-style:italic;margin-bottom:6px;line-height:1.4}
 </style>
 </head>
 <body>
 
 <header>
-  <div>
+  <div class="header-left">
     <h1>Elvanse Journal</h1>
-    <p>Started <span id="start-display">—</span></p>
+    <div class="header-meta">
+      <span id="log-count-wrap"><span id="log-count">0</span> logs</span>
+      <span id="streak-wrap" style="display:none"><span class="streak-badge" id="streak-badge"></span></span>
+    </div>
   </div>
-  <div class="dose-badge" id="dose-badge" onclick="toggleDosePopup()">
-    <span id="dose-label">10 mg / day</span>
-    <div class="dose-popup" id="dose-popup">
-      <label>Current dose</label>
-      <div class="dose-popup-row">
-        <input type="number" id="dose-input" min="5" max="70" step="5" value="10">
-        <span>mg / day</span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button onclick="toggleQuickLog()" style="font-family:'DM Sans',sans-serif;font-size:12px;background:var(--good-soft);color:var(--good);border:1px solid var(--good);border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap">Quick log</button>
+    <div class="dose-badge" id="dose-badge" onclick="toggleDosePopup()">
+      <span id="dose-label">10 mg / day</span>
+      <div class="dose-popup" id="dose-popup">
+        <label>Current dose</label>
+        <div class="dose-popup-row">
+          <input type="number" id="dose-input" min="5" max="70" step="5" value="10">
+          <span>mg / day</span>
+        </div>
+        <button onclick="saveDose(event)">Save</button>
       </div>
-      <button onclick="saveDose(event)">Save</button>
     </div>
   </div>
 </header>
 
+<!-- QUICK LOG BAR -->
+<div class="quick-log-bar" id="quick-log-bar">
+  <div class="ql-title" style="margin-bottom:14px">Quick log — <span id="ql-date-label"></span></div>
+
+  <div class="ql-scale-block">
+    <div class="ql-scale-header">
+      <span class="ql-scale-name">Mood AM</span>
+      <span class="ql-scale-num" id="ql-v-mood-am">5</span>
+    </div>
+    <div class="ql-scale-hint">1–3 = low / flat · 5 = neutral · 8–10 = genuinely good</div>
+    <input type="range" min="1" max="10" value="5" oninput="qlScale('mood-am',this.value)" style="accent-color:var(--good);width:100%">
+  </div>
+
+  <div class="ql-scale-block">
+    <div class="ql-scale-header">
+      <span class="ql-scale-name">Focus</span>
+      <span class="ql-scale-num" id="ql-v-focus">5</span>
+    </div>
+    <div class="ql-scale-hint">1–3 = scattered, can’t finish anything · 5 = can focus with effort · 8–10 = locked in</div>
+    <input type="range" min="1" max="10" value="5" oninput="qlScale('focus',this.value)" style="accent-color:var(--accent);width:100%">
+  </div>
+
+  <div class="ql-scale-block">
+    <div class="ql-scale-header">
+      <span class="ql-scale-name">Mood PM</span>
+      <span class="ql-scale-num" id="ql-v-mood-pm">5</span>
+    </div>
+    <div class="ql-scale-hint">Compare to Mood AM — a drop of 3+ points often signals rebound</div>
+    <input type="range" min="1" max="10" value="5" oninput="qlScale('mood-pm',this.value)" style="accent-color:var(--pill);width:100%">
+  </div>
+
+  <div class="ql-row">
+    <input class="ql-note" id="ql-note" placeholder="One line note (optional)…">
+    <button class="ql-save" onclick="saveQuickLog()">Save</button>
+    <span class="save-status" id="ql-status">Saved ✓</span>
+  </div>
+</div>
+
 <nav>
   <button class="active" onclick="switchTab('log',this)">Log today</button>
-  <button onclick="switchTab('cycle',this)">Cycle</button>
   <button onclick="switchTab('history',this)">History</button>
+  <button onclick="switchTab('cycle',this)">Cycle</button>
   <button onclick="switchTab('trends',this)">Trends</button>
 </nav>
 
 <main>
 
-<!-- ═══ LOG ═══ -->
+<!-- LOG -->
 <div class="view active" id="view-log">
-  <!-- Edit mode banner -->
-  <div id="edit-banner" style="display:none;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:10px">
+  <div id="edit-banner" style="display:none;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;gap:10px">
     <span style="font-size:13px;color:var(--accent);font-weight:500">Editing entry</span>
     <button onclick="cancelEdit()" style="font-family:'DM Sans',sans-serif;font-size:12px;background:none;border:1px solid var(--accent);border-radius:var(--rs);padding:4px 10px;color:var(--accent);cursor:pointer">Cancel</button>
   </div>
@@ -213,7 +293,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <input type="date" class="field-input" id="log-date" onchange="onDateChange()">
   </div>
 
-  <!-- Dose & timing -->
+  <!-- SKIP TOGGLE -->
+  <div class="skip-toggle" id="skip-toggle" onclick="toggleSkip()">
+    <div class="skip-toggle-left">
+      <div class="skip-icon" id="skip-icon">&#128138;</div>
+      <div>
+        <div class="skip-label" id="skip-label">Took Elvanse today</div>
+        <div class="skip-sub" id="skip-sub">Tap to mark as skipped</div>
+      </div>
+    </div>
+    <div class="skip-pill" id="skip-pill">Taken</div>
+  </div>
+  <div class="skip-reasons" id="skip-reasons">
+    <div class="skip-reasons-title">Reason for skipping</div>
+    <div class="skip-reason-grid">
+      <div class="skip-reason-chip" onclick="setSkipReason(this,'Rest day')">Rest day</div>
+      <div class="skip-reason-chip" onclick="setSkipReason(this,'Forgot')">Forgot</div>
+      <div class="skip-reason-chip" onclick="setSkipReason(this,'Side effects')">Side effects</div>
+      <div class="skip-reason-chip" onclick="setSkipReason(this,'Doctor advised')">Doctor advised</div>
+      <div class="skip-reason-chip" onclick="setSkipReason(this,'Personal')">Personal</div>
+      <div class="skip-reason-chip" onclick="setSkipReason(this,'Other')">Other</div>
+    </div>
+  </div>
+
+  <div id="med-fields">
   <div class="card">
     <div class="card-title">Dose & timing</div>
     <div class="two-col">
@@ -228,51 +331,54 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="three-col" id="window-grid"></div>
   </div>
 
-  <!-- Mood & energy -->
   <div class="card">
     <div class="card-title">Mood & energy</div>
     <div class="tp-label">Morning (before / at onset)</div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Mood</span><span class="scale-val empty" id="v-mood-am">—</span></div>
-      <input type="range" min="1" max="10" id="s-mood-am" oninput="setScale('mood-am',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">low</span><span class="scale-tick">5</span><span class="scale-tick">elevated</span></div>
+      <div class="scale-header"><span class="scale-label">Mood</span><span class="scale-val" id="v-mood-am">5</span></div>
+      <div class="scale-hint">1–3 = low, flat, hard to get up · 5 = neutral, going through the motions · 7–9 = genuinely good · 10 = unusually elevated</div>
+      <input type="range" min="1" max="10" value="5" id="s-mood-am" oninput="setScale('mood-am',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">low</span><span class="scale-tick">5 neutral</span><span class="scale-tick">elevated</span></div>
     </div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Energy</span><span class="scale-val empty" id="v-energy-am">—</span></div>
-      <input type="range" min="1" max="10" id="s-energy-am" oninput="setScale('energy-am',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">depleted</span><span class="scale-tick">5</span><span class="scale-tick">high</span></div>
+      <div class="scale-header"><span class="scale-label">Energy</span><span class="scale-val" id="v-energy-am">5</span></div>
+      <div class="scale-hint">1–3 = exhausted, can barely function · 5 = enough to get through the day · 7–9 = alert and driven · 10 = unusually wired</div>
+      <input type="range" min="1" max="10" value="5" id="s-energy-am" oninput="setScale('energy-am',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">depleted</span><span class="scale-tick">5 okay</span><span class="scale-tick">high</span></div>
     </div>
     <div class="divider"></div>
     <div class="tp-label">Evening (after dose wears off)</div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Mood</span><span class="scale-val empty" id="v-mood-pm">—</span></div>
-      <input type="range" min="1" max="10" id="s-mood-pm" oninput="setScale('mood-pm',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">low</span><span class="scale-tick">5</span><span class="scale-tick">elevated</span></div>
+      <div class="scale-header"><span class="scale-label">Mood</span><span class="scale-val" id="v-mood-pm">5</span></div>
+      <div class="scale-hint">Compare to your morning score — a drop of 3+ points often signals rebound</div>
+      <input type="range" min="1" max="10" value="5" id="s-mood-pm" oninput="setScale('mood-pm',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">low</span><span class="scale-tick">5 neutral</span><span class="scale-tick">elevated</span></div>
     </div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Energy</span><span class="scale-val empty" id="v-energy-pm">—</span></div>
-      <input type="range" min="1" max="10" id="s-energy-pm" oninput="setScale('energy-pm',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">depleted</span><span class="scale-tick">5</span><span class="scale-tick">high</span></div>
+      <div class="scale-header"><span class="scale-label">Energy</span><span class="scale-val" id="v-energy-pm">5</span></div>
+      <div class="scale-hint">How drained do you feel now vs this morning?</div>
+      <input type="range" min="1" max="10" value="5" id="s-energy-pm" oninput="setScale('energy-pm',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">depleted</span><span class="scale-tick">5 okay</span><span class="scale-tick">high</span></div>
     </div>
   </div>
 
-  <!-- Focus & anxiety -->
   <div class="card">
     <div class="card-title">Focus & anxiety</div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Focus / concentration</span><span class="scale-val empty" id="v-focus">—</span></div>
-      <input type="range" min="1" max="10" id="s-focus" oninput="setScale('focus',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">scattered</span><span class="scale-tick">5</span><span class="scale-tick">locked in</span></div>
+      <div class="scale-header"><span class="scale-label">Focus / concentration</span><span class="scale-val" id="v-focus">5</span></div>
+      <div class="scale-hint">1–3 = jumping between tasks, can't finish anything · 5 = can focus with effort · 8–10 = deep work, time flies, hard to interrupt</div>
+      <input type="range" min="1" max="10" value="5" id="s-focus" oninput="setScale('focus',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">scattered</span><span class="scale-tick">5 okay</span><span class="scale-tick">locked in</span></div>
     </div>
     <div class="divider"></div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Anxiety / irritability</span><span class="scale-val empty" id="v-anxiety">—</span></div>
-      <input type="range" min="1" max="10" id="s-anxiety" oninput="setScale('anxiety',this.value)" style="accent-color:var(--warn)">
-      <div class="scale-ticks"><span class="scale-tick">calm</span><span class="scale-tick">5</span><span class="scale-tick">very anxious</span></div>
+      <div class="scale-header"><span class="scale-label">Anxiety / irritability</span><span class="scale-val" id="v-anxiety">5</span></div>
+      <div class="scale-hint">1–3 = calm and regulated · 5 = some tension but manageable · 8–10 = racing thoughts, snappy, hard to settle</div>
+      <input type="range" min="1" max="10" value="5" id="s-anxiety" oninput="setScale('anxiety',this.value)" style="accent-color:var(--warn)">
+      <div class="scale-ticks"><span class="scale-tick">calm</span><span class="scale-tick">5 moderate</span><span class="scale-tick">very anxious</span></div>
     </div>
   </div>
 
-  <!-- Peak -->
   <div class="card peak-card">
     <div class="card-title">Peak window</div>
     <div class="two-col" style="margin-bottom:12px">
@@ -280,64 +386,62 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div><div class="field-label">Until</div><input type="time" class="field-input" id="l-peak-to"></div>
     </div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Peak quality</span><span class="scale-val empty" id="v-peak">—</span></div>
-      <input type="range" min="1" max="10" id="s-peak" oninput="setScale('peak',this.value)" style="accent-color:var(--peak)">
+      <div class="scale-header"><span class="scale-label">Peak quality</span><span class="scale-val" id="v-peak">5</span></div>
+      <div class="scale-hint">How effective did the medication feel at its best today? 1 = barely noticed it · 5 = some effect · 10 = very effective, clear head, in control</div>
+      <input type="range" min="1" max="10" value="5" id="s-peak" oninput="setScale('peak',this.value)" style="accent-color:var(--peak)">
       <div class="scale-ticks"><span class="scale-tick">weak</span><span class="scale-tick">5</span><span class="scale-tick">strong</span></div>
     </div>
     <div style="margin-top:12px"><div class="field-label">Peak notes</div>
-      <textarea class="field-input" id="l-peak-notes" placeholder="Hyperfocus, clarity, overstimulated…"></textarea></div>
+      <textarea class="field-input" id="l-peak-notes" placeholder="Hyperfocus, clarity, overstimulated, restless…"></textarea></div>
   </div>
 
-  <!-- Rebound -->
   <div class="card rebound-card">
     <div class="card-title">Rebound / comedown</div>
-    <div class="two-col" style="margin-bottom:12px">
-      <div><div class="field-label">Started at</div><input type="time" class="field-input" id="l-rebound-time"></div>
-      <div>
-        <div class="field-label">Severity</div>
-        <div class="scale-header" style="margin-bottom:7px"><span></span><span class="scale-val empty" id="v-rebound">—</span></div>
-        <input type="range" min="1" max="10" id="s-rebound" oninput="setScale('rebound',this.value)" style="accent-color:var(--rebound)">
-        <div class="scale-ticks"><span class="scale-tick">mild</span><span class="scale-tick">5</span><span class="scale-tick">rough</span></div>
-      </div>
+    <div style="margin-bottom:14px">
+      <div class="field-label">Started at</div>
+      <input type="time" class="field-input" id="l-rebound-time" style="max-width:160px">
     </div>
-    <div class="field-label">Rebound notes</div>
-    <textarea class="field-input" id="l-rebound-notes" placeholder="Mood dip, fatigue, irritable, foggy…"></textarea>
+    <div class="scale-group" style="margin-bottom:14px">
+      <div class="scale-header"><span class="scale-label">Severity</span><span class="scale-val" id="v-rebound">5</span></div>
+      <div class="scale-hint">1–3 = smooth comedown · 5 = noticeable dip · 8–10 = significant crash, very irritable or low</div>
+      <input type="range" min="1" max="10" value="5" id="s-rebound" oninput="setScale('rebound',this.value)" style="accent-color:var(--rebound)">
+      <div class="scale-ticks"><span class="scale-tick">mild</span><span class="scale-tick">5</span><span class="scale-tick">rough</span></div>
+    </div>
+    <div><div class="field-label">Rebound notes</div>
+    <textarea class="field-input" id="l-rebound-notes" placeholder="Mood dip, fatigue, irritable, foggy, tearful…"></textarea></div>
   </div>
 
-  <!-- Body -->
   <div class="card">
     <div class="card-title">Body</div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Appetite</span><span class="scale-val empty" id="v-appetite">—</span></div>
-      <input type="range" min="1" max="10" id="s-appetite" oninput="setScale('appetite',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">none</span><span class="scale-tick">5</span><span class="scale-tick">normal</span></div>
+      <div class="scale-header"><span class="scale-label">Appetite</span><span class="scale-val" id="v-appetite">5</span></div>
+      <div class="scale-hint">1 = no desire to eat at all · 5 = reduced but you can eat if you try · 9–10 = normal hunger</div>
+      <input type="range" min="1" max="10" value="5" id="s-appetite" oninput="setScale('appetite',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">none</span><span class="scale-tick">5 reduced</span><span class="scale-tick">normal</span></div>
     </div>
     <div class="divider"></div>
     <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">Sleep quality (last night)</span><span class="scale-val empty" id="v-sleep">—</span></div>
-      <input type="range" min="1" max="10" id="s-sleep" oninput="setScale('sleep',this.value)">
-      <div class="scale-ticks"><span class="scale-tick">awful</span><span class="scale-tick">5</span><span class="scale-tick">great</span></div>
+      <div class="scale-header"><span class="scale-label">Sleep quality (last night)</span><span class="scale-val" id="v-sleep">5</span></div>
+      <div class="scale-hint">1 = barely slept or very disrupted · 5 = okay but not great · 9–10 = slept well, felt rested</div>
+      <input type="range" min="1" max="10" value="5" id="s-sleep" oninput="setScale('sleep',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">awful</span><span class="scale-tick">5 okay</span><span class="scale-tick">great</span></div>
     </div>
   </div>
 
-  <!-- Side effects -->
   <div class="card">
     <div class="card-title">Side effects</div>
     <div class="chip-grid" id="effects-grid"></div>
   </div>
 
-  <!-- Movement -->
   <div class="card">
     <div class="card-title">Movement</div>
     <div class="field-label" style="margin-bottom:8px">Type</div>
     <div class="three-col" id="exercise-grid" style="margin-bottom:12px"></div>
-    <div class="two-col">
-      <div><div class="field-label">Duration (min)</div><input type="number" class="field-input" id="l-exercise-min" min="0" max="300" placeholder="0"></div>
-      <div><div class="field-label">Screen time (hrs)</div><input type="number" class="field-input" id="l-screen" min="0" max="24" step="0.5" placeholder="0"></div>
+    <div style="max-width:50%;padding-right:5px">
+      <div class="field-label">Duration (min)</div><input type="number" class="field-input" id="l-exercise-min" min="0" max="300" placeholder="0">
     </div>
   </div>
 
-  <!-- Cycle -->
   <div class="card">
     <div class="card-title">Cycle (optional)</div>
     <div class="two-col">
@@ -351,7 +455,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
   </div>
 
-  <!-- Notes -->
+  </div><!-- /med-fields -->
+
   <div class="card">
     <div class="card-title">Notes</div>
     <textarea class="field-input" id="l-notes" style="min-height:80px" placeholder="Anything worth remembering…"></textarea>
@@ -363,12 +468,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 </div>
 
-<!-- ═══ CYCLE ═══ -->
+<!-- HISTORY -->
+<div class="view" id="view-history">
+  <div id="week-summary-wrap"></div>
+  <div id="history-list"></div>
+</div>
+
+<!-- CYCLE -->
 <div class="view" id="view-cycle">
   <div class="cycle-nav">
-    <button class="btn-outline" onclick="cycleNav(-1)">‹</button>
+    <button class="btn-outline" onclick="cycleNav(-1)">&#8249;</button>
     <span class="cycle-month" id="cycle-month-label"></span>
-    <button class="btn-outline" onclick="cycleNav(1)">›</button>
+    <button class="btn-outline" onclick="cycleNav(1)">&#8250;</button>
   </div>
   <div class="cycle-legend">
     <div class="legend-item"><div class="legend-dot" style="background:#C4704A"></div>Menstrual</div>
@@ -382,7 +493,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="c-stat"><div class="c-stat-num" id="cs-day">—</div><div class="c-stat-lbl">Today day</div></div>
     <div class="c-stat"><div class="c-stat-num" id="cs-phase">—</div><div class="c-stat-lbl">Phase</div></div>
   </div>
-
   <div class="cycle-entry-panel card" id="cycle-panel">
     <div class="card-title" id="cycle-panel-title">Log cycle day</div>
     <div class="two-col">
@@ -407,12 +517,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 </div>
 
-<!-- ═══ HISTORY ═══ -->
-<div class="view" id="view-history">
-  <div id="history-list"></div>
-</div>
-
-<!-- ═══ TRENDS ═══ -->
+<!-- TRENDS -->
 <div class="view" id="view-trends">
   <div id="trends-content"></div>
 </div>
@@ -420,23 +525,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </main>
 
 <script>
-// ══ CONSTANTS ══
-const WINDOWS = ['< 4 h','4–6 h','6–8 h','8–10 h','> 10 h','Not sure'];
+const WINDOWS = ['< 4 h','4-6 h','6-8 h','8-10 h','> 10 h','Not sure'];
 const EFFECTS = ['Headache','Heart racing','Dry mouth','Nausea','Jaw tension','Trouble sleeping','Mood dip','Overstimulated'];
 const EXERCISE = ['Running','Strength','Mobility / yoga'];
 const FLOW = ['None','Light','Medium','Heavy','Spotting'];
 const CYCLE_SYMS = ['Cramps','Bloating','Breast tenderness','Headache','Brain fog','Low energy','Mood swings','Heightened focus'];
 const PHASES = ['Menstrual','Follicular','Ovulatory','Luteal'];
 const PHASE_COLORS = {
-  menstrual:  {bg:'#FDECEA',border:'#C4704A',text:'#C4704A'},
-  follicular: {bg:'#E8F4EE',border:'#4A8A6F',text:'#4A8A6F'},
-  ovulatory:  {bg:'#FBF5E6',border:'#D4A843',text:'#D4A843'},
-  luteal:     {bg:'#F0ECF8',border:'#9B7EC8',text:'#9B7EC8'},
+  menstrual:  {bg:'#FDECEA',border:'#C4704A',text:'#C4704A',bar:'#C4704A'},
+  follicular: {bg:'#E8F4EE',border:'#4A8A6F',text:'#4A8A6F',bar:'#4A8A6F'},
+  ovulatory:  {bg:'#FBF5E6',border:'#D4A843',text:'#D4A843',bar:'#D4A843'},
+  luteal:     {bg:'#F0ECF8',border:'#9B7EC8',text:'#9B7EC8',bar:'#9B7EC8'},
 };
 const SCALE_KEYS = ['mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peak','rebound','appetite','sleep'];
 
-// ══ STATE ══
-let editingDate = null; // when set, log form is in edit mode
+let editingDate = null;
+let skipped = false;
+let skipReason = null;
 let entries = {};
 let cycleEntries = {};
 let scaleVals = {};
@@ -447,10 +552,10 @@ let cycleViewDate = new Date();
 let cycleSelectedDate = null;
 let cycleSymptoms = [];
 let cycleFlow = null;
-// history view/edit mode per date
 let histMode = {};
+let qlVals = {'mood-am':5,'mood-pm':5,'focus':5};
 
-// ══ STORAGE ══
+// STORAGE
 function load() {
   try { entries = JSON.parse(localStorage.getItem('el_entries') || '{}'); } catch { entries = {}; }
   try { cycleEntries = JSON.parse(localStorage.getItem('el_cycle') || '{}'); } catch { cycleEntries = {}; }
@@ -459,23 +564,21 @@ function saveEntries() { localStorage.setItem('el_entries', JSON.stringify(entri
 function saveCycleEntries() { localStorage.setItem('el_cycle', JSON.stringify(cycleEntries)); }
 function getDose() { return localStorage.getItem('el_dose') || '10'; }
 function setDoseStorage(v) { localStorage.setItem('el_dose', v); }
-function getStartDate() {
-  let sd = localStorage.getItem('el_start');
-  if (!sd) { sd = todayStr(); localStorage.setItem('el_start', sd); }
-  return sd;
+function getFirstLogDate() {
+  const keys = Object.keys(entries).sort();
+  return keys.length ? keys[0] : todayStr();
 }
 
-// ══ UTILS ══
+// UTILS
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function fmtDate(s) {
-  if (!s) return '—';
+  if (!s) return '-';
   return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 }
 function fmtDateShort(s) {
-  if (!s) return '—';
+  if (!s) return '-';
   return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 }
-
 function to12(val) {
   if (!val) return '';
   const parts = val.split(':');
@@ -489,42 +592,72 @@ function to12(val) {
 }
 function flash(id) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2000);
 }
 function v(id) { return document.getElementById(id); }
+function avg(arr) {
+  const x = arr.filter(v => v != null);
+  return x.length ? (x.reduce((a,b)=>a+b,0)/x.length) : null;
+}
 
-// ══ INIT ══
+// INIT
 function init() {
   load();
-  // Render static chip grids
   renderChipGrid('window-grid', WINDOWS, 'window', 'accent', true);
   renderChipGrid('effects-grid', EFFECTS, 'effect', 'warn', false);
   renderChipGrid('exercise-grid', EXERCISE, 'exercise', 'good', true);
   renderChipGrid('flow-grid', FLOW, 'flow', 'accent', true);
   renderChipGrid('cycle-sym-grid', CYCLE_SYMS, 'csym', 'warn', false);
 
-  // Dose badge
   const dose = getDose();
   v('dose-label').textContent = dose + ' mg / day';
   v('dose-input').value = dose;
 
-  // Start date
-  v('start-display').textContent = fmtDate(getStartDate());
+  updateHeaderStats();
 
-  // Log date
   v('log-date').value = todayStr();
+  v('ql-date-label').textContent = fmtDate(todayStr());
   updateLogDateLabel();
   loadEntryIntoForm(todayStr());
 
-  // Click outside to close dose popup
   document.addEventListener('click', e => {
     const badge = v('dose-badge');
     if (!badge.contains(e.target)) v('dose-popup').classList.remove('open');
   });
 }
 
-// ══ CHIP GRID RENDERER ══
+function updateHeaderStats() {
+  // log count
+  const logCount = Object.keys(entries).length;
+  if (v('log-count')) v('log-count').textContent = logCount;
+
+  // streak
+  const streak = calcStreak();
+  if (streak >= 2) {
+    v('streak-wrap').style.display = '';
+    v('streak-badge').textContent = streak + ' day streak';
+  } else {
+    v('streak-wrap').style.display = 'none';
+  }
+}
+
+function calcStreak() {
+  const keys = Object.keys(entries).sort().reverse();
+  if (!keys.length) return 0;
+  let streak = 0;
+  let d = new Date();
+  d.setHours(12,0,0,0);
+  for (let i = 0; i < 60; i++) {
+    const ds = d.toISOString().slice(0,10);
+    if (entries[ds]) { streak++; } else if (streak > 0) { break; }
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+// CHIP GRID
 function renderChipGrid(gridId, items, type, colorClass, single) {
   const grid = v(gridId);
   if (!grid) return;
@@ -532,27 +665,20 @@ function renderChipGrid(gridId, items, type, colorClass, single) {
     <div class="chip${single?' center':''}" data-type="${type}" data-val="${item}"
       onclick="toggleChip(this,'${type}','${item}','${colorClass}',${single})">
       ${single ? '' : '<span class="cdot"></span>'}${item}
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function toggleChip(el, type, val, colorClass, single) {
   if (single) {
-    // deselect all of same type first
     document.querySelectorAll(`.chip[data-type="${type}"]`).forEach(c => c.className = c.className.replace(/ ?(warn|accent|good)-on/g,''));
-    if (getChipSelected(type) === val) {
-      setChipSelected(type, null);
-    } else {
-      el.classList.add(colorClass+'-on');
-      setChipSelected(type, val);
-    }
+    if (getChipSelected(type) === val) { setChipSelected(type, null); }
+    else { el.classList.add(colorClass+'-on'); setChipSelected(type, val); }
   } else {
     const active = el.classList.contains(colorClass+'-on');
     el.classList.toggle(colorClass+'-on');
     toggleMultiChip(type, val, !active);
   }
 }
-
 function getChipSelected(type) {
   if (type === 'window') return selectedWindow;
   if (type === 'exercise') return selectedExercise;
@@ -565,55 +691,77 @@ function setChipSelected(type, val) {
   if (type === 'flow') cycleFlow = val;
 }
 function toggleMultiChip(type, val, add) {
-  if (type === 'effect') {
-    selectedEffects = add ? [...selectedEffects, val] : selectedEffects.filter(x=>x!==val);
-  }
-  if (type === 'csym') {
-    cycleSymptoms = add ? [...cycleSymptoms, val] : cycleSymptoms.filter(x=>x!==val);
-  }
+  if (type === 'effect') selectedEffects = add ? [...selectedEffects, val] : selectedEffects.filter(x=>x!==val);
+  if (type === 'csym') cycleSymptoms = add ? [...cycleSymptoms, val] : cycleSymptoms.filter(x=>x!==val);
 }
 
-// ══ SCALES ══
+// SCALES
 function setScale(key, val) {
   scaleVals[key] = parseInt(val);
   const el = v('v-'+key);
   if (el) { el.textContent = val; el.classList.remove('empty'); }
 }
-
 function resetScales() {
   SCALE_KEYS.forEach(k => {
     scaleVals[k] = 5;
-    const el = v('v-'+k);
-    if (el) { el.textContent = '5'; el.classList.remove('empty'); }
-    const sl = v('s-'+k);
-    if (sl) sl.value = 5;
+    const el = v('v-'+k); if (el) { el.textContent = '5'; el.classList.remove('empty'); }
+    const sl = v('s-'+k); if (sl) sl.value = 5;
   });
 }
 
-// ══ LOG FORM ══
-function onDateChange() {
-  updateLogDateLabel();
-  loadEntryIntoForm(v('log-date').value);
+// QUICK LOG
+function toggleQuickLog() {
+  const bar = v('quick-log-bar');
+  bar.classList.toggle('open');
+}
+function qlScale(key, val) {
+  qlVals[key] = parseInt(val);
+  const el = v('ql-v-'+key);
+  if (el) el.textContent = val;
+}
+function saveQuickLog() {
+  const date = todayStr();
+  const existing = entries[date] || {};
+  entries[date] = {
+    ...existing,
+    date,
+    dose: existing.dose || getDose(),
+    'mood-am': qlVals['mood-am'],
+    'mood-pm': qlVals['mood-pm'],
+    focus: qlVals['focus'],
+    notes: v('ql-note').value.trim() || existing.notes || '',
+  };
+  saveEntries();
+  updateHeaderStats();
+  flash('ql-status');
+  v('ql-note').value = '';
+  ['mood-am','mood-pm','focus'].forEach(k => {
+    qlVals[k] = 5;
+    const sl = document.querySelector('#quick-log-bar input[oninput*="' + k + '"]');
+    if (sl) sl.value = 5;
+    const vl = v('ql-v-'+k); if (vl) vl.textContent = '5';
+  });
+  setTimeout(() => v('quick-log-bar').classList.remove('open'), 1200);
 }
 
-function updateLogDateLabel() {
-  v('log-date-label').textContent = fmtDate(v('log-date').value);
-}
+// LOG FORM
+function onDateChange() { updateLogDateLabel(); loadEntryIntoForm(v('log-date').value); }
+function updateLogDateLabel() { v('log-date-label').textContent = fmtDate(v('log-date').value); }
 
 function resetForm() {
   ['l-dose','l-dose-time','l-onset','l-peak-from','l-peak-to','l-peak-notes',
-   'l-rebound-time','l-rebound-notes','l-exercise-min','l-screen','l-notes'].forEach(id => {
+   'l-rebound-time','l-rebound-notes','l-exercise-min','l-notes'].forEach(id => {
     const el = v(id); if (el) el.value = '';
   });
   v('l-dose').value = getDose();
   v('l-cycle-day').value = '';
   v('l-cycle-phase').value = '';
   resetScales();
-  // reset chips
   document.querySelectorAll('.chip[data-type]').forEach(c => {
     c.className = c.className.replace(/ ?(warn|accent|good)-on/g,'');
   });
   selectedEffects = []; selectedExercise = null; selectedWindow = null;
+  resetSkip();
 }
 
 function loadEntryIntoForm(date) {
@@ -633,7 +781,6 @@ function loadEntryIntoForm(date) {
   if (e.notes) v('l-notes').value = e.notes;
   if (e.cycleDay) v('l-cycle-day').value = e.cycleDay;
   if (e.cyclePhase) v('l-cycle-phase').value = e.cyclePhase;
-  // scales
   SCALE_KEYS.forEach(k => {
     if (e[k] != null) {
       scaleVals[k] = e[k];
@@ -641,23 +788,31 @@ function loadEntryIntoForm(date) {
       const vl = v('v-'+k); if (vl) { vl.textContent = e[k]; vl.classList.remove('empty'); }
     }
   });
-  // effects
   selectedEffects = e.effects ? [...e.effects] : [];
   (e.effects||[]).forEach(ef => {
     const chip = document.querySelector(`.chip[data-type="effect"][data-val="${ef}"]`);
     if (chip) chip.classList.add('warn-on');
   });
-  // exercise
   if (e.exerciseType) {
     selectedExercise = e.exerciseType;
     const chip = document.querySelector(`.chip[data-type="exercise"][data-val="${e.exerciseType}"]`);
     if (chip) chip.classList.add('good-on');
   }
-  // window
   if (e.window) {
     selectedWindow = e.window;
     const chip = document.querySelector(`.chip[data-type="window"][data-val="${e.window}"]`);
     if (chip) chip.classList.add('accent-on');
+  }
+  if (e.skipped) {
+    skipped = false;
+    toggleSkip();
+    if (e.skipReason) {
+      skipReason = e.skipReason;
+      document.querySelectorAll('.skip-reason-chip').forEach(c => {
+        if (c.textContent.trim() === e.skipReason) c.classList.add('selected');
+      });
+      v('skip-sub').textContent = e.skipReason;
+    }
   }
 }
 
@@ -686,10 +841,11 @@ function collectForm(date) {
     effects: [...selectedEffects],
     exerciseType: selectedExercise || '',
     exerciseMin: v('l-exercise-min').value,
-    screenHrs: v('l-screen').value,
     cycleDay: v('l-cycle-day').value,
     cyclePhase: v('l-cycle-phase').value,
     notes: v('l-notes').value.trim(),
+    skipped: skipped,
+    skipReason: skipReason || '',
   };
 }
 
@@ -698,6 +854,7 @@ function saveEntry() {
   if (!date) return;
   entries[date] = collectForm(date);
   saveEntries();
+  updateHeaderStats();
   if (editingDate) {
     editingDate = null;
     v('log-date').disabled = false;
@@ -709,7 +866,44 @@ function saveEntry() {
   }
 }
 
-// ══ DOSE POPUP ══
+// SKIP DOSE
+function toggleSkip() {
+  skipped = !skipped;
+  skipReason = null;
+  document.querySelectorAll('.skip-reason-chip').forEach(c => c.classList.remove('selected'));
+  const tog = v('skip-toggle'), icon = v('skip-icon'), lbl = v('skip-label');
+  const sub = v('skip-sub'), pill = v('skip-pill');
+  const reasons = v('skip-reasons'), meds = v('med-fields');
+  if (skipped) {
+    tog.classList.add('skipped');
+    icon.textContent = '⏸';
+    lbl.textContent = 'Skipped Elvanse today';
+    sub.textContent = 'Select a reason below';
+    pill.textContent = 'Skipped';
+    reasons.classList.add('open');
+    meds.classList.add('meds-dimmed');
+  } else {
+    tog.classList.remove('skipped');
+    icon.innerHTML = '&#128138;';
+    lbl.textContent = 'Took Elvanse today';
+    sub.textContent = 'Tap to mark as skipped';
+    pill.textContent = 'Taken';
+    reasons.classList.remove('open');
+    meds.classList.remove('meds-dimmed');
+  }
+}
+function setSkipReason(el, reason) {
+  skipReason = reason;
+  document.querySelectorAll('.skip-reason-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  v('skip-sub').textContent = reason;
+}
+function resetSkip() {
+  if (skipped) toggleSkip();
+  skipReason = null;
+}
+
+// DOSE POPUP
 function toggleDosePopup() {
   v('dose-popup').classList.toggle('open');
   v('dose-input').value = getDose();
@@ -725,20 +919,29 @@ function saveDose(evt) {
   v('dose-popup').classList.remove('open');
 }
 
-// ══ TABS ══
+// TABS
 function switchTab(name, btn) {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   v('view-'+name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'log') { editingDate = null; v('log-date').disabled = false; v('edit-banner').style.display = 'none'; v('log-save-btn').textContent = 'Save entry'; v('log-date').value = todayStr(); updateLogDateLabel(); loadEntryIntoForm(todayStr()); }
+  if (name === 'log') {
+    editingDate = null;
+    v('log-date').disabled = false;
+    v('edit-banner').style.display = 'none';
+    v('log-save-btn').textContent = 'Save entry';
+    v('log-date').value = todayStr();
+    updateLogDateLabel();
+    loadEntryIntoForm(todayStr());
+  }
   if (name === 'history') renderHistory();
   if (name === 'trends') renderTrends();
   if (name === 'cycle') renderCalendar();
 }
 
-// ══ HISTORY ══
+// HISTORY
 function renderHistory() {
+  renderWeekSummary();
   const list = v('history-list');
   const keys = Object.keys(entries).sort().reverse();
   if (!keys.length) {
@@ -747,23 +950,26 @@ function renderHistory() {
   }
   list.innerHTML = keys.map(date => {
     const e = entries[date];
+    const phaseKey = (e.cyclePhase||'').toLowerCase();
+    const pc = phaseKey && PHASE_COLORS[phaseKey] ? PHASE_COLORS[phaseKey] : null;
     const pills = [
       e.dose ? e.dose+'mg' : null,
-      e.doseTime ? '⏱ '+to12(e.doseTime) : null,
-      e.onsetTime ? 'onset '+to12(e.onsetTime) : null,
-      e['mood-am'] != null ? 'Mood AM '+e['mood-am'] : null,
-      e['mood-pm'] != null ? 'Mood PM '+e['mood-pm'] : null,
+      e.doseTime ? to12(e.doseTime) : null,
+      e['mood-am'] != null ? 'Mood '+e['mood-am'] : null,
       e.focus != null ? 'Focus '+e.focus : null,
       e.peak != null ? 'Peak '+e.peak : null,
-      e.rebound != null ? 'Rebound '+e.rebound : null,
-      (e.effects||[]).length ? e.effects.length+' effects' : null,
+      e.rebound != null ? 'Reb '+e.rebound : null,
+      (e.effects||[]).length ? e.effects.length+' FX' : null,
+      e.cyclePhase ? e.cyclePhase.slice(0,3) : null,
     ].filter(Boolean);
-
-    return `<div class="entry-card">
+    const notePreview = e.notes ? `<span class="hist-note-preview">${e.notes}</span>` : '';
+    const phaseDot = pc ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${pc.border};margin-right:4px;flex-shrink:0"></span>` : '';
+    const skipBorder = e.skipped ? 'border-left:3px solid var(--warn)' : '';
+    return `<div class="entry-card" style="${skipBorder}">
       <div class="entry-header" onclick="toggleEntry('${date}')">
-        <span class="entry-date">${fmtDate(date)}</span>
-        <div class="entry-pills">${pills.map(p=>`<span class="mini-pill">${p}</span>`).join('')}</div>
-        <span class="entry-toggle" id="etoggle-${date}">▾</span>
+        <div style="flex-shrink:0">${phaseDot}<span class="entry-date">${fmtDateShort(date)}</span></div>
+        <div class="entry-pills">${pills.map(p=>`<span class="mini-pill">${p}</span>`).join('')}${notePreview}</div>
+        <span class="entry-toggle" id="etoggle-${date}">&#9662;</span>
       </div>
       <div class="entry-body" id="ebody-${date}">
         <div class="view-edit-row">
@@ -774,10 +980,64 @@ function renderHistory() {
       </div>
     </div>`;
   }).join('');
-  // default mode
-  keys.forEach(date => {
-    if (!histMode[date]) histMode[date] = 'view';
-  });
+}
+
+function renderWeekSummary() {
+  const wrap = v('week-summary-wrap');
+  const keys = Object.keys(entries).sort();
+  if (keys.length < 3) { wrap.innerHTML = ''; return; }
+
+  // Last 7 days
+  const today = new Date();
+  const weekKeys = [];
+  for (let i=6;i>=0;i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate()-i);
+    const ds = d.toISOString().slice(0,10);
+    if (entries[ds]) weekKeys.push(ds);
+  }
+  if (!weekKeys.length) { wrap.innerHTML = ''; return; }
+
+  const wEntries = weekKeys.map(k => entries[k]);
+  const avgFocus = avg(wEntries.map(e=>e.focus));
+  const avgMoodAm = avg(wEntries.map(e=>e['mood-am']));
+  const avgMoodPm = avg(wEntries.map(e=>e['mood-pm']));
+  const avgRebound = avg(wEntries.map(e=>e.rebound));
+  const avgSleep = avg(wEntries.map(e=>e.sleep));
+  const daysLogged = weekKeys.length;
+  const effectCount = {};
+  wEntries.forEach(e=>(e.effects||[]).forEach(ef=>{effectCount[ef]=(effectCount[ef]||0)+1;}));
+  const topEffect = Object.entries(effectCount).sort((a,b)=>b[1]-a[1])[0];
+  const moodDrop = (avgMoodAm != null && avgMoodPm != null) ? (avgMoodAm - avgMoodPm).toFixed(1) : null;
+
+  const insights = [];
+  if (avgFocus != null) {
+    if (avgFocus >= 7) insights.push('Focus has been strong this week — good signal the dose is working');
+    else if (avgFocus <= 4) insights.push('Focus has been low — worth discussing with your prescriber');
+    else insights.push(`Average focus ${avgFocus.toFixed(1)}/10 — mid-range, keep tracking`);
+  }
+  if (moodDrop != null && parseFloat(moodDrop) >= 2.5) {
+    insights.push(`Mood dropping ${moodDrop} points AM→PM on average — possible rebound pattern`);
+  }
+  if (avgRebound != null && avgRebound >= 6) {
+    insights.push('Rebound has been significant — timing of dose or dose size may need review');
+  }
+  if (avgSleep != null && avgSleep <= 4) {
+    insights.push('Sleep has been poor — consider whether dose timing is affecting it');
+  }
+  if (topEffect && topEffect[1] >= 3) {
+    insights.push(`${topEffect[0]} appeared ${topEffect[1]}x this week`);
+  }
+
+  wrap.innerHTML = `<div class="week-summary">
+    <div class="ws-title">This week — ${daysLogged}/7 days logged</div>
+    <div class="ws-grid">
+      <div class="ws-stat"><div class="ws-num">${avgFocus != null ? avgFocus.toFixed(1) : '-'}</div><div class="ws-lbl">Avg focus</div></div>
+      <div class="ws-stat"><div class="ws-num">${avgMoodAm != null ? avgMoodAm.toFixed(1) : '-'}</div><div class="ws-lbl">Mood AM</div></div>
+      <div class="ws-stat"><div class="ws-num">${avgRebound != null ? avgRebound.toFixed(1) : '-'}</div><div class="ws-lbl">Avg rebound</div></div>
+    </div>
+    ${insights.length ? `<div class="ws-insights"><ul>${insights.map(i=>`<li>${i}</li>`).join('')}</ul></div>` : ''}
+  </div>`;
 }
 
 function toggleEntry(date) {
@@ -785,11 +1045,9 @@ function toggleEntry(date) {
   const tog = v('etoggle-'+date);
   const isOpen = body.classList.contains('open');
   body.classList.toggle('open');
-  tog.textContent = isOpen ? '▾' : '▴';
+  tog.innerHTML = isOpen ? '&#9662;' : '&#9652;';
   if (!isOpen) renderHistContent(date);
 }
-
-
 
 function editEntry(date) {
   editingDate = date;
@@ -801,10 +1059,10 @@ function editEntry(date) {
   v('log-date').disabled = true;
   updateLogDateLabel();
   loadEntryIntoForm(date);
-  // Show editing banner and update save button
-  v('edit-banner').style.display = 'flex';
+  const eb = v('edit-banner');
+  eb.style.display = 'flex';
   v('log-save-btn').textContent = 'Save changes';
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function cancelEdit() {
@@ -819,7 +1077,7 @@ function switchToHistory() {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   v('view-history').classList.add('active');
-  document.querySelectorAll('nav button')[2].classList.add('active');
+  document.querySelectorAll('nav button')[1].classList.add('active');
   renderHistory();
 }
 
@@ -832,33 +1090,32 @@ function renderHistContent(date) {
 
 function buildEntryReadView(e) {
   const ef = (label, val) => val != null && val !== '' ? `<div><div class="ef-label">${label}</div><div class="ef-val">${val}</div></div>` : '';
-  const peakStr = e.peakFrom ? `${to12(e.peakFrom)}${e.peakTo?'–'+to12(e.peakTo):''}${e.peak!=null?' · '+e.peak+'/10':''}` : e.peak!=null ? e.peak+'/10' : null;
+  const peakStr = e.peakFrom ? `${to12(e.peakFrom)}${e.peakTo?'-'+to12(e.peakTo):''}${e.peak!=null?' · '+e.peak+'/10':''}` : e.peak!=null ? e.peak+'/10' : null;
   const rebStr = e.reboundTime ? `${to12(e.reboundTime)}${e.rebound!=null?' · '+e.rebound+'/10':''}` : e.rebound!=null ? e.rebound+'/10' : null;
-  return `<div class="entry-grid">
-    ${ef('Dose', e.dose ? e.dose+'mg' : null)}
-    ${ef('Dose at', to12(e.doseTime))}
-    ${ef('Onset at', to12(e.onsetTime))}
-    ${ef('Window', e.window)}
-    ${ef('Mood AM', e['mood-am']!=null ? e['mood-am']+'/10' : null)}
-    ${ef('Energy AM', e['energy-am']!=null ? e['energy-am']+'/10' : null)}
-    ${ef('Mood PM', e['mood-pm']!=null ? e['mood-pm']+'/10' : null)}
-    ${ef('Energy PM', e['energy-pm']!=null ? e['energy-pm']+'/10' : null)}
-    ${ef('Focus', e.focus!=null ? e.focus+'/10' : null)}
-    ${ef('Anxiety', e.anxiety!=null ? e.anxiety+'/10' : null)}
-    ${ef('Peak', peakStr)}
-    ${ef('Rebound', rebStr)}
-    ${ef('Appetite', e.appetite!=null ? e.appetite+'/10' : null)}
-    ${ef('Sleep', e.sleep!=null ? e.sleep+'/10' : null)}
-    ${ef('Exercise', e.exerciseType ? e.exerciseType+(e.exerciseMin?' · '+e.exerciseMin+'min':'') : e.exerciseMin ? e.exerciseMin+'min' : null)}
-    ${ef('Screen', e.screenHrs ? e.screenHrs+'h' : null)}
-    ${ef('Cycle', e.cycleDay ? 'Day '+e.cycleDay+(e.cyclePhase?' · '+e.cyclePhase:'') : e.cyclePhase||null)}
-    ${(e.effects||[]).length ? `<div style="grid-column:1/-1">${ef('Side effects', e.effects.join(', '))}</div>` : ''}
+  const skipBadge = e.skipped ? `<div style="grid-column:1/-1;margin-bottom:6px"><span style="background:var(--warn-soft);color:var(--warn);font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--warn)">⏸ Skipped${e.skipReason ? ' · '+e.skipReason : ''}</span></div>` : '';
+  return `<div class="entry-grid">${skipBadge}
+    ${ef('Dose',e.dose?e.dose+'mg':null)}
+    ${ef('Dose at',to12(e.doseTime))}
+    ${ef('Onset at',to12(e.onsetTime))}
+    ${ef('Window',e.window)}
+    ${ef('Mood AM',e['mood-am']!=null?e['mood-am']+'/10':null)}
+    ${ef('Energy AM',e['energy-am']!=null?e['energy-am']+'/10':null)}
+    ${ef('Mood PM',e['mood-pm']!=null?e['mood-pm']+'/10':null)}
+    ${ef('Energy PM',e['energy-pm']!=null?e['energy-pm']+'/10':null)}
+    ${ef('Focus',e.focus!=null?e.focus+'/10':null)}
+    ${ef('Anxiety',e.anxiety!=null?e.anxiety+'/10':null)}
+    ${ef('Peak',peakStr)}
+    ${ef('Rebound',rebStr)}
+    ${ef('Appetite',e.appetite!=null?e.appetite+'/10':null)}
+    ${ef('Sleep',e.sleep!=null?e.sleep+'/10':null)}
+    ${ef('Exercise',e.exerciseType?e.exerciseType+(e.exerciseMin?' · '+e.exerciseMin+'min':''):e.exerciseMin?e.exerciseMin+'min':null)}
+    ${ef('Cycle',e.cycleDay?'Day '+e.cycleDay+(e.cyclePhase?' · '+e.cyclePhase:''):e.cyclePhase||null)}
+    ${(e.effects||[]).length?`<div style="grid-column:1/-1">${ef('Side effects',e.effects.join(', '))}</div>`:''}
   </div>
-  ${e.peakNotes ? `<div class="entry-note peak-note" style="margin-top:8px"><span class="note-type" style="color:var(--peak)">Peak</span>${e.peakNotes}</div>` : ''}
-  ${e.reboundNotes ? `<div class="entry-note rebound-note" style="margin-top:6px"><span class="note-type" style="color:var(--rebound)">Rebound</span>${e.reboundNotes}</div>` : ''}
-  ${e.notes ? `<div class="entry-note" style="margin-top:8px">${e.notes}</div>` : ''}`;
+  ${e.peakNotes?`<div class="entry-note peak-note" style="margin-top:8px"><span class="note-type" style="color:var(--peak)">Peak</span>${e.peakNotes}</div>`:''}
+  ${e.reboundNotes?`<div class="entry-note rebound-note" style="margin-top:6px"><span class="note-type" style="color:var(--rebound)">Rebound</span>${e.reboundNotes}</div>`:''}
+  ${e.notes?`<div class="entry-note" style="margin-top:8px">${e.notes}</div>`:''}`;
 }
-
 
 function deleteEntry(date) {
   if (!confirm('Delete entry for '+fmtDate(date)+'?')) return;
@@ -867,30 +1124,23 @@ function deleteEntry(date) {
   renderHistory();
 }
 
-// ══ CYCLE ══
+// CYCLE
 function renderCalendar() {
   const y = cycleViewDate.getFullYear();
   const m = cycleViewDate.getMonth();
   v('cycle-month-label').textContent = new Date(y,m,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-
   const today = todayStr();
   const firstDay = new Date(y,m,1);
   const startOffset = (firstDay.getDay()+6)%7;
   const daysInMonth = new Date(y,m+1,0).getDate();
   const prevDays = new Date(y,m,0).getDate();
-
   const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   let html = dayNames.map(d=>`<div class="cal-dayname">${d}</div>`).join('');
-
-  // prev month padding
   for (let i=startOffset-1;i>=0;i--) html += `<div class="cal-cell other-month">${prevDays-i}</div>`;
-
-  // this month
   for (let d=1;d<=daysInMonth;d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ce = cycleEntries[ds];
     const ee = entries[ds];
-    // Determine phase from cycle entry first, then elvanse entry
     const phaseRaw = ce?.phase || ee?.cyclePhase || '';
     const phaseKey = phaseRaw.toLowerCase();
     const hasData = !!(ce || ee?.cycleDay || ee?.cyclePhase);
@@ -901,27 +1151,21 @@ function renderCalendar() {
     const dot = hasData ? '<div class="cdot2"></div>' : '';
     html += `<div class="${cls}" onclick="openCycleDay('${ds}')">${d}${dot}</div>`;
   }
-
-  // fill end
   const total = startOffset + daysInMonth;
   const rem = total%7===0?0:7-(total%7);
   for (let i=1;i<=rem;i++) html += `<div class="cal-cell other-month">${i}</div>`;
-
   v('cal-grid').innerHTML = html;
   updateCycleStats();
 }
-
 function cycleNav(dir) {
   cycleViewDate = new Date(cycleViewDate.getFullYear(), cycleViewDate.getMonth()+dir, 1);
   renderCalendar();
 }
-
 function openCycleDay(ds) {
   cycleSelectedDate = ds;
   const panel = v('cycle-panel');
   panel.classList.add('open');
   v('cycle-panel-title').textContent = fmtDate(ds);
-  // reset
   v('c-day-num').value = '';
   v('c-phase').value = '';
   v('c-notes').value = '';
@@ -929,7 +1173,6 @@ function openCycleDay(ds) {
   document.querySelectorAll('#flow-grid .chip, #cycle-sym-grid .chip').forEach(c => {
     c.className = c.className.replace(/ ?(warn|accent|good)-on/g,'');
   });
-
   const ce = cycleEntries[ds];
   const ee = entries[ds];
   if (ce) {
@@ -953,7 +1196,6 @@ function openCycleDay(ds) {
   panel.scrollIntoView({behavior:'smooth',block:'start'});
   renderCalendar();
 }
-
 function saveCycleEntry() {
   if (!cycleSelectedDate) return;
   cycleEntries[cycleSelectedDate] = {
@@ -968,18 +1210,17 @@ function saveCycleEntry() {
   flash('cycle-save-status');
   renderCalendar();
 }
-
 function updateCycleStats() {
   const today = todayStr();
-  v('cs-logged').textContent = Object.keys(cycleEntries).length || '—';
+  v('cs-logged').textContent = Object.keys(cycleEntries).length || '-';
   const todayCE = cycleEntries[today];
   const todayEE = entries[today];
-  v('cs-day').textContent = todayCE?.dayNum || todayEE?.cycleDay || '—';
+  v('cs-day').textContent = todayCE?.dayNum || todayEE?.cycleDay || '-';
   const phase = todayCE?.phase || todayEE?.cyclePhase || '';
-  v('cs-phase').textContent = phase ? phase.slice(0,3) : '—';
+  v('cs-phase').textContent = phase ? phase.slice(0,3) : '-';
 }
 
-// ══ TRENDS ══
+// TRENDS
 function renderTrends() {
   const container = v('trends-content');
   const keys = Object.keys(entries).sort();
@@ -987,8 +1228,8 @@ function renderTrends() {
     container.innerHTML = '<div class="card"><p class="no-data">Log at least 2 days to see trends.</p></div>';
     return;
   }
-  const recent = keys.slice(-7);
-  const avg = arr => { const x=arr.filter(v=>v!=null); return x.length?(x.reduce((a,b)=>a+b,0)/x.length).toFixed(1):'—'; };
+  const recent = keys.slice(-10);
+  const avgFn = arr => { const x=arr.filter(v=>v!=null); return x.length?(x.reduce((a,b)=>a+b,0)/x.length).toFixed(1):'-'; };
 
   const metrics = [
     {key:'mood-am',label:'Mood — morning',color:'#4A8A6F'},
@@ -1007,26 +1248,45 @@ function renderTrends() {
   keys.forEach(k=>(entries[k].effects||[]).forEach(e=>{effectCount[e]=(effectCount[e]||0)+1;}));
   const topEffects = Object.entries(effectCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
 
+  // Phase legend for trends
+  const phaseLegend = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:11px;color:var(--muted)">
+    <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-family:'DM Mono',monospace;color:var(--faint);margin-right:4px">Phase overlay:</span>
+    ${Object.entries(PHASE_COLORS).map(([p,c])=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${c.bar};display:inline-block"></span>${p.charAt(0).toUpperCase()+p.slice(1)}</span>`).join('')}
+  </div>`;
+
   let html = `<div class="stats-row">
     <div class="stat-box"><div class="stat-num">${keys.length}</div><div class="stat-lbl">Days logged</div></div>
-    <div class="stat-box"><div class="stat-num">${avg(keys.map(k=>entries[k].focus))}</div><div class="stat-lbl">Avg focus</div></div>
-    <div class="stat-box"><div class="stat-num">${avg(keys.map(k=>entries[k].peak))}</div><div class="stat-lbl">Avg peak</div></div>
+    <div class="stat-box"><div class="stat-num">${avgFn(keys.map(k=>entries[k].focus))}</div><div class="stat-lbl">Avg focus</div></div>
+    <div class="stat-box"><div class="stat-num">${avgFn(keys.map(k=>entries[k].peak))}</div><div class="stat-lbl">Avg peak</div></div>
   </div>`;
+
+  html += phaseLegend;
 
   metrics.forEach(m => {
     const vals = recent.map(k=>entries[k][m.key]);
     if (!vals.some(x=>x!=null)) return;
+
+    // Build phase color segments under bars
+    const phaseSegs = recent.map(k => {
+      const e = entries[k];
+      const ph = (e.cyclePhase || cycleEntries[k]?.phase || '').toLowerCase();
+      return PHASE_COLORS[ph] ? PHASE_COLORS[ph].bar : 'transparent';
+    });
+
     html += `<div class="card" style="margin-bottom:10px">
       <div class="trend-title">${m.label} — last ${recent.length} days</div>
       <div class="bar-chart">
         ${recent.map((k,i)=>{
           const val=vals[i];
-          const h=val!=null?Math.round((val/10)*50):0;
+          const h=val!=null?Math.round((val/10)*52):0;
           return `<div class="bar-col">
-            <div class="bar" style="height:${h}px;background:${val!=null?m.color:'var(--border)'};opacity:${val!=null?.8:.3}" title="${val!=null?val+'/10':'—'}"></div>
-            <span class="bar-lbl">${fmtDateShort(k)}</span>
+            <div class="bar" style="height:${h}px;background:${val!=null?m.color:'var(--border)'};opacity:${val!=null?.85:.3}" title="${val!=null?val+'/10':'-'}"></div>
+            <span class="bar-lbl">${fmtDateShort(k).replace(' ','&nbsp;')}</span>
           </div>`;
         }).join('')}
+      </div>
+      <div class="phase-bar-row" style="margin-top:2px">
+        ${recent.map((k,i)=>`<div class="phase-bar-seg" style="background:${phaseSegs[i]};opacity:.6" title="${(entries[k].cyclePhase||cycleEntries[k]?.phase||'')}"></div>`).join('')}
       </div>
     </div>`;
   });
@@ -1034,7 +1294,7 @@ function renderTrends() {
   if (topEffects.length) {
     html += `<div class="card" style="margin-bottom:10px">
       <div class="card-title">Most common side effects</div>
-      ${topEffects.map(([n,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--surface-alt)"><span style="font-size:13px">${n}</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--warn)">${c}×</span></div>`).join('')}
+      ${topEffects.map(([n,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--surface-alt)"><span style="font-size:13px">${n}</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--warn)">${c}x</span></div>`).join('')}
     </div>`;
   }
 
@@ -1044,7 +1304,7 @@ function renderTrends() {
 
 function exportCSV() {
   const keys = Object.keys(entries).sort();
-  const hdrs = ['date','dose','doseTime','onsetTime','window','mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peakFrom','peakTo','peak','peakNotes','reboundTime','rebound','reboundNotes','appetite','sleep','effects','exerciseType','exerciseMin','screenHrs','cycleDay','cyclePhase','notes'];
+  const hdrs = ['date','skipped','skipReason','dose','doseTime','onsetTime','window','mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peakFrom','peakTo','peak','peakNotes','reboundTime','rebound','reboundNotes','appetite','sleep','effects','exerciseType','exerciseMin','cycleDay','cyclePhase','notes'];
   const rows = keys.map(k=>{const e=entries[k];return hdrs.map(h=>{let val=e[h]??'';if(Array.isArray(val))val=val.join('; ');return `"${String(val).replace(/"/g,'""')}"`}).join(',')});
   const blob = new Blob([[hdrs.join(','),...rows].join('\n')],{type:'text/csv'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='elvanse-tracker.csv'; a.click();
