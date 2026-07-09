@@ -202,6 +202,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <!-- ═══ LOG ═══ -->
 <div class="view active" id="view-log">
+  <!-- Edit mode banner -->
+  <div id="edit-banner" style="display:none;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:10px">
+    <span style="font-size:13px;color:var(--accent);font-weight:500">Editing entry</span>
+    <button onclick="cancelEdit()" style="font-family:'DM Sans',sans-serif;font-size:12px;background:none;border:1px solid var(--accent);border-radius:var(--rs);padding:4px 10px;color:var(--accent);cursor:pointer">Cancel</button>
+  </div>
+
   <div class="date-strip">
     <span class="date-label" id="log-date-label">—</span>
     <input type="date" class="field-input" id="log-date" onchange="onDateChange()">
@@ -352,7 +358,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 
   <div class="save-row">
-    <button class="btn-save" onclick="saveEntry()">Save entry</button>
+    <button class="btn-save" id="log-save-btn" onclick="saveEntry()">Save entry</button>
     <span class="save-status" id="log-save-status">Saved ✓</span>
   </div>
 </div>
@@ -430,6 +436,7 @@ const PHASE_COLORS = {
 const SCALE_KEYS = ['mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peak','rebound','appetite','sleep'];
 
 // ══ STATE ══
+let editingDate = null; // when set, log form is in edit mode
 let entries = {};
 let cycleEntries = {};
 let scaleVals = {};
@@ -691,7 +698,15 @@ function saveEntry() {
   if (!date) return;
   entries[date] = collectForm(date);
   saveEntries();
-  flash('log-save-status');
+  if (editingDate) {
+    editingDate = null;
+    v('log-date').disabled = false;
+    v('edit-banner').style.display = 'none';
+    v('log-save-btn').textContent = 'Save entry';
+    switchToHistory();
+  } else {
+    flash('log-save-status');
+  }
 }
 
 // ══ DOSE POPUP ══
@@ -716,7 +731,7 @@ function switchTab(name, btn) {
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   v('view-'+name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'log') { v('log-date').value = todayStr(); updateLogDateLabel(); loadEntryIntoForm(todayStr()); }
+  if (name === 'log') { editingDate = null; v('log-date').disabled = false; v('edit-banner').style.display = 'none'; v('log-save-btn').textContent = 'Save entry'; v('log-date').value = todayStr(); updateLogDateLabel(); loadEntryIntoForm(todayStr()); }
   if (name === 'history') renderHistory();
   if (name === 'trends') renderTrends();
   if (name === 'cycle') renderCalendar();
@@ -752,8 +767,7 @@ function renderHistory() {
       </div>
       <div class="entry-body" id="ebody-${date}">
         <div class="view-edit-row">
-          <button class="btn-sm" id="hbtn-view-${date}" onclick="setHistMode('${date}','view')" style="background:var(--text);color:#fff;border-color:var(--text)">View</button>
-          <button class="btn-sm" id="hbtn-edit-${date}" onclick="editEntry('${date}')">Edit</button>
+          <button class="btn-sm" onclick="editEntry('${date}')">Edit</button>
           <button class="btn-delete" onclick="deleteEntry('${date}')">Delete</button>
         </div>
         <div id="hcontent-${date}"></div>
@@ -775,23 +789,38 @@ function toggleEntry(date) {
   if (!isOpen) renderHistContent(date);
 }
 
-function setHistMode(date, mode) {
-  histMode[date] = 'view';
-  const vb = v('hbtn-view-'+date);
-  if (vb) { vb.style.background = 'var(--text)'; vb.style.color = '#fff'; vb.style.borderColor = 'var(--text)'; }
-  renderHistContent(date);
-}
+
 
 function editEntry(date) {
-  // Switch to log tab with this date pre-loaded
+  editingDate = date;
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   v('view-log').classList.add('active');
   document.querySelector('nav button').classList.add('active');
   v('log-date').value = date;
+  v('log-date').disabled = true;
   updateLogDateLabel();
   loadEntryIntoForm(date);
+  // Show editing banner and update save button
+  v('edit-banner').style.display = 'flex';
+  v('log-save-btn').textContent = 'Save changes';
   window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function cancelEdit() {
+  editingDate = null;
+  v('log-date').disabled = false;
+  v('edit-banner').style.display = 'none';
+  v('log-save-btn').textContent = 'Save entry';
+  switchToHistory();
+}
+
+function switchToHistory() {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+  v('view-history').classList.add('active');
+  document.querySelectorAll('nav button')[2].classList.add('active');
+  renderHistory();
 }
 
 function renderHistContent(date) {
