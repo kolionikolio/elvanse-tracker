@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elvanse Journal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+:root {
+  --bg:#F7F6F3;--surface:#FFF;--surface-alt:#F0EEE9;--border:#E2DED7;
+  --text:#1A1916;--muted:#8A857C;--faint:#C2BDB5;
+  --accent:#4A6FA5;--accent-soft:#E8EDF5;
+  --warn:#C4704A;--warn-soft:#FAF0EA;
+  --good:#4A8A6F;--good-soft:#E8F4EE;
+  --pill:#9B7EC8;--pill-soft:#F0ECF8;
+  --peak:#D4A843;--peak-soft:#FBF5E6;
+  --rebound:#A05070;--rebound-soft:#F5ECF0;
+  --r:10px;--rs:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 20px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:100}
+header h1{font-size:17px;font-weight:500;letter-spacing:-.3px}
+header p{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.dose-badge{background:var(--pill-soft);color:var(--pill);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:5px 10px;border-radius:20px;border:1px solid #D9D0EE;white-space:nowrap;cursor:pointer;position:relative;flex-shrink:0}
+.dose-popup{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.10);min-width:180px}
+.dose-popup.open{display:block}
+.dose-popup label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:8px}
+.dose-popup-row{display:flex;align-items:center;gap:8px}
+.dose-popup input{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;width:64px;border:1px solid var(--border);border-radius:var(--rs);padding:6px 8px;color:var(--pill);background:var(--pill-soft);outline:none;text-align:center}
+.dose-popup span{font-size:13px;color:var(--muted)}
+.dose-popup button{margin-top:10px;width:100%;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:8px;cursor:pointer}
+
+/* NAV */
+nav{display:flex;gap:4px;padding:10px 14px;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);background:none;border:1px solid transparent;border-radius:20px;padding:5px 13px;cursor:pointer;white-space:nowrap;transition:all .15s}
+nav button.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* MAIN */
+main{padding:14px;max-width:600px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.card.peak-card{border-color:var(--peak);background:var(--peak-soft)}
+.card.rebound-card{border-color:var(--rebound);background:var(--rebound-soft)}
+.card-title{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:13px;font-family:'DM Mono',monospace}
+.peak-card .card-title{color:var(--peak)}
+.rebound-card .card-title{color:var(--rebound)}
+
+/* FIELDS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.field-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.field-input{font-family:'DM Sans',sans-serif;font-size:14px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:8px 11px;border-radius:var(--rs);width:100%;outline:none;transition:border-color .15s}
+.field-input:focus{border-color:var(--accent);background:var(--surface)}
+select.field-input{cursor:pointer}
+textarea.field-input{resize:none;min-height:64px;font-size:13px;line-height:1.5}
+
+/* DATE STRIP */
+.date-strip{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.date-label{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+input[type="date"].field-input{font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;width:auto}
+
+/* SCALES */
+.scale-group{margin-bottom:14px}
+.scale-group:last-child{margin-bottom:0}
+.scale-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.scale-label{font-size:13px}
+.scale-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);font-weight:500;min-width:20px;text-align:right}
+.scale-val.empty{color:var(--faint)}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--border);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 1px var(--accent);cursor:pointer}
+.peak-card input[type=range]::-webkit-slider-thumb{background:var(--peak);box-shadow:0 0 0 1px var(--peak)}
+.rebound-card input[type=range]::-webkit-slider-thumb{background:var(--rebound);box-shadow:0 0 0 1px var(--rebound)}
+.peak-card .scale-val{color:var(--peak)}
+.rebound-card .scale-val{color:var(--rebound)}
+.scale-ticks{display:flex;justify-content:space-between;margin-top:3px}
+.scale-tick{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint)}
+
+/* TIME POINT LABEL */
+.tp-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--surface-alt)}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--surface-alt);margin:14px 0}
+
+/* CHIPS */
+.chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.chip{display:flex;align-items:center;gap:7px;padding:8px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;font-size:13px;user-select:none;transition:all .12s}
+.chip .cdot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex-shrink:0;transition:background .12s}
+.chip.warn-on{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}.chip.warn-on .cdot{background:var(--warn)}
+.chip.accent-on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}.chip.accent-on .cdot{background:var(--accent)}
+.chip.good-on{background:var(--good-soft);border-color:var(--good);color:var(--good)}.chip.good-on .cdot{background:var(--good)}
+.chip.center{justify-content:center;text-align:center;font-size:12px;padding:8px 4px}
+
+/* BUTTONS */
+.btn-save{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:12px;cursor:pointer;flex:1}
+.btn-outline{font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:8px 14px;cursor:pointer}
+.btn-outline.active-outline{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-sm{font-family:'DM Sans',sans-serif;font-size:12px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:5px 12px;cursor:pointer}
+.save-row{display:flex;gap:10px;align-items:center;margin-top:16px}
+.save-status{font-family:'DM Mono',monospace;font-size:11px;color:var(--good);opacity:0;transition:opacity .3s;white-space:nowrap}
+.save-status.show{opacity:1}
+
+/* HISTORY */
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.entry-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;gap:10px}
+.entry-date{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0}
+.entry-pills{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.mini-pill{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--surface-alt);color:var(--muted);border:1px solid var(--border);white-space:nowrap}
+.entry-toggle{font-size:11px;color:var(--faint);flex-shrink:0}
+.entry-body{display:none;padding:0 16px 14px;border-top:1px solid var(--surface-alt)}
+.entry-body.open{display:block}
+.view-edit-row{display:flex;gap:8px;margin:12px 0 14px;align-items:center}
+.entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.ef-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);margin-bottom:1px;font-family:'DM Mono',monospace}
+.ef-val{font-size:12px;font-family:'DM Mono',monospace}
+.entry-note{margin-top:8px;padding:9px 11px;background:var(--bg);border-radius:var(--rs);font-size:12px;line-height:1.6;font-style:italic}
+.peak-note{border-left:2px solid var(--peak);background:var(--peak-soft);font-style:normal}
+.rebound-note{border-left:2px solid var(--rebound);background:var(--rebound-soft);font-style:normal}
+.note-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:500;display:block;margin-bottom:2px}
+.btn-delete{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--warn);background:none;border:1px solid var(--warn);border-radius:var(--rs);padding:5px 12px;cursor:pointer;margin-left:auto}
+
+/* CYCLE CALENDAR */
+.cycle-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cycle-month{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+.cycle-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px}
+.cal-dayname{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);text-align:center;padding-bottom:4px;text-transform:uppercase}
+.cal-cell{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;border:1px solid transparent;background:var(--bg);color:var(--muted);transition:all .12s;position:relative}
+.cal-cell:hover{border-color:var(--border)}
+.cal-cell.other-month{opacity:.3;cursor:default;pointer-events:none}
+.cal-cell.today{border-color:var(--accent);color:var(--accent);font-weight:600}
+.cal-cell.selected{border-width:2px;border-color:var(--accent)}
+.cal-cell.phase-menstrual{background:#FDECEA;border-color:#C4704A;color:#C4704A}
+.cal-cell.phase-follicular{background:#E8F4EE;border-color:#4A8A6F;color:#4A8A6F}
+.cal-cell.phase-ovulatory{background:#FBF5E6;border-color:#D4A843;color:#D4A843}
+.cal-cell.phase-luteal{background:#F0ECF8;border-color:#9B7EC8;color:#9B7EC8}
+.cal-cell .cdot2{width:4px;height:4px;border-radius:50%;background:currentColor;margin-top:2px;opacity:.7}
+.cycle-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.c-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
+.c-stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent);line-height:1;margin-bottom:3px}
+.c-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.cycle-entry-panel{display:none}
+.cycle-entry-panel.open{display:block}
+.sym-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 8px}
+
+/* TRENDS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 12px;text-align:center}
+.stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent);line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.bar-chart{display:flex;align-items:flex-end;gap:3px;height:56px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.bar{width:100%;border-radius:2px 2px 0 0;min-height:2px}
+.bar-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--faint)}
+.trend-title{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:500;margin-bottom:10px;font-family:'DM Mono',monospace}
+.no-data{font-size:13px;color:var(--faint);font-style:italic;padding:14px 0}
+
+/* HISTORY EMPTY */
+.hist-empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
+.hist-empty .big{font-size:28px;display:block;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Elvanse Journal</h1>
+    <p>Started <span id="start-display">—</span></p>
+  </div>
+  <div class="dose-badge" id="dose-badge" onclick="toggleDosePopup()">
+    <span id="dose-label">10 mg / day</span>
+    <div class="dose-popup" id="dose-popup">
+      <label>Current dose</label>
+      <div class="dose-popup-row">
+        <input type="number" id="dose-input" min="5" max="70" step="5" value="10">
+        <span>mg / day</span>
+      </div>
+      <button onclick="saveDose(event)">Save</button>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('log',this)">Log today</button>
+  <button onclick="switchTab('cycle',this)">Cycle</button>
+  <button onclick="switchTab('history',this)">History</button>
+  <button onclick="switchTab('trends',this)">Trends</button>
+</nav>
+
+<main>
+
+<!-- ═══ LOG ═══ -->
+<div class="view active" id="view-log">
+  <div class="date-strip">
+    <span class="date-label" id="log-date-label">—</span>
+    <input type="date" class="field-input" id="log-date" onchange="onDateChange()">
+  </div>
+
+  <!-- Dose & timing -->
+  <div class="card">
+    <div class="card-title">Dose & timing</div>
+    <div class="two-col">
+      <div><div class="field-label">Dose taken (mg)</div><input type="number" class="field-input" id="l-dose" min="5" max="70" step="5" placeholder="mg"></div>
+      <div><div class="field-label">Took dose at</div><input type="time" class="field-input" id="l-dose-time"></div>
+    </div>
+    <div class="two-col" style="margin-bottom:10px">
+      <div><div class="field-label">Felt onset at</div><input type="time" class="field-input" id="l-onset"></div>
+      <div></div>
+    </div>
+    <div class="field-label" style="margin-bottom:8px">Effectiveness window</div>
+    <div class="three-col" id="window-grid"></div>
+  </div>
+
+  <!-- Mood & energy -->
+  <div class="card">
+    <div class="card-title">Mood & energy</div>
+    <div class="tp-label">Morning (before / at onset)</div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Mood</span><span class="scale-val empty" id="v-mood-am">—</span></div>
+      <input type="range" min="1" max="10" id="s-mood-am" oninput="setScale('mood-am',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">low</span><span class="scale-tick">5</span><span class="scale-tick">elevated</span></div>
+    </div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Energy</span><span class="scale-val empty" id="v-energy-am">—</span></div>
+      <input type="range" min="1" max="10" id="s-energy-am" oninput="setScale('energy-am',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">depleted</span><span class="scale-tick">5</span><span class="scale-tick">high</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="tp-label">Evening (after dose wears off)</div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Mood</span><span class="scale-val empty" id="v-mood-pm">—</span></div>
+      <input type="range" min="1" max="10" id="s-mood-pm" oninput="setScale('mood-pm',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">low</span><span class="scale-tick">5</span><span class="scale-tick">elevated</span></div>
+    </div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Energy</span><span class="scale-val empty" id="v-energy-pm">—</span></div>
+      <input type="range" min="1" max="10" id="s-energy-pm" oninput="setScale('energy-pm',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">depleted</span><span class="scale-tick">5</span><span class="scale-tick">high</span></div>
+    </div>
+  </div>
+
+  <!-- Focus & anxiety -->
+  <div class="card">
+    <div class="card-title">Focus & anxiety</div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Focus / concentration</span><span class="scale-val empty" id="v-focus">—</span></div>
+      <input type="range" min="1" max="10" id="s-focus" oninput="setScale('focus',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">scattered</span><span class="scale-tick">5</span><span class="scale-tick">locked in</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Anxiety / irritability</span><span class="scale-val empty" id="v-anxiety">—</span></div>
+      <input type="range" min="1" max="10" id="s-anxiety" oninput="setScale('anxiety',this.value)" style="accent-color:var(--warn)">
+      <div class="scale-ticks"><span class="scale-tick">calm</span><span class="scale-tick">5</span><span class="scale-tick">very anxious</span></div>
+    </div>
+  </div>
+
+  <!-- Peak -->
+  <div class="card peak-card">
+    <div class="card-title">Peak window</div>
+    <div class="two-col" style="margin-bottom:12px">
+      <div><div class="field-label">Peak from</div><input type="time" class="field-input" id="l-peak-from"></div>
+      <div><div class="field-label">Until</div><input type="time" class="field-input" id="l-peak-to"></div>
+    </div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Peak quality</span><span class="scale-val empty" id="v-peak">—</span></div>
+      <input type="range" min="1" max="10" id="s-peak" oninput="setScale('peak',this.value)" style="accent-color:var(--peak)">
+      <div class="scale-ticks"><span class="scale-tick">weak</span><span class="scale-tick">5</span><span class="scale-tick">strong</span></div>
+    </div>
+    <div style="margin-top:12px"><div class="field-label">Peak notes</div>
+      <textarea class="field-input" id="l-peak-notes" placeholder="Hyperfocus, clarity, overstimulated…"></textarea></div>
+  </div>
+
+  <!-- Rebound -->
+  <div class="card rebound-card">
+    <div class="card-title">Rebound / comedown</div>
+    <div class="two-col" style="margin-bottom:12px">
+      <div><div class="field-label">Started at</div><input type="time" class="field-input" id="l-rebound-time"></div>
+      <div>
+        <div class="field-label">Severity</div>
+        <div class="scale-header" style="margin-bottom:7px"><span></span><span class="scale-val empty" id="v-rebound">—</span></div>
+        <input type="range" min="1" max="10" id="s-rebound" oninput="setScale('rebound',this.value)" style="accent-color:var(--rebound)">
+        <div class="scale-ticks"><span class="scale-tick">mild</span><span class="scale-tick">5</span><span class="scale-tick">rough</span></div>
+      </div>
+    </div>
+    <div class="field-label">Rebound notes</div>
+    <textarea class="field-input" id="l-rebound-notes" placeholder="Mood dip, fatigue, irritable, foggy…"></textarea>
+  </div>
+
+  <!-- Body -->
+  <div class="card">
+    <div class="card-title">Body</div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Appetite</span><span class="scale-val empty" id="v-appetite">—</span></div>
+      <input type="range" min="1" max="10" id="s-appetite" oninput="setScale('appetite',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">none</span><span class="scale-tick">5</span><span class="scale-tick">normal</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">Sleep quality (last night)</span><span class="scale-val empty" id="v-sleep">—</span></div>
+      <input type="range" min="1" max="10" id="s-sleep" oninput="setScale('sleep',this.value)">
+      <div class="scale-ticks"><span class="scale-tick">awful</span><span class="scale-tick">5</span><span class="scale-tick">great</span></div>
+    </div>
+  </div>
+
+  <!-- Side effects -->
+  <div class="card">
+    <div class="card-title">Side effects</div>
+    <div class="chip-grid" id="effects-grid"></div>
+  </div>
+
+  <!-- Movement -->
+  <div class="card">
+    <div class="card-title">Movement</div>
+    <div class="field-label" style="margin-bottom:8px">Type</div>
+    <div class="three-col" id="exercise-grid" style="margin-bottom:12px"></div>
+    <div class="two-col">
+      <div><div class="field-label">Duration (min)</div><input type="number" class="field-input" id="l-exercise-min" min="0" max="300" placeholder="0"></div>
+      <div><div class="field-label">Screen time (hrs)</div><input type="number" class="field-input" id="l-screen" min="0" max="24" step="0.5" placeholder="0"></div>
+    </div>
+  </div>
+
+  <!-- Cycle -->
+  <div class="card">
+    <div class="card-title">Cycle (optional)</div>
+    <div class="two-col">
+      <div><div class="field-label">Cycle day</div><input type="number" class="field-input" id="l-cycle-day" min="1" max="40" placeholder="e.g. 14"></div>
+      <div><div class="field-label">Phase</div>
+        <select class="field-input" id="l-cycle-phase">
+          <option value="">—</option>
+          <option>Menstrual</option><option>Follicular</option><option>Ovulatory</option><option>Luteal</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <div class="card-title">Notes</div>
+    <textarea class="field-input" id="l-notes" style="min-height:80px" placeholder="Anything worth remembering…"></textarea>
+  </div>
+
+  <div class="save-row">
+    <button class="btn-save" onclick="saveEntry()">Save entry</button>
+    <span class="save-status" id="log-save-status">Saved ✓</span>
+  </div>
+</div>
+
+<!-- ═══ CYCLE ═══ -->
+<div class="view" id="view-cycle">
+  <div class="cycle-nav">
+    <button class="btn-outline" onclick="cycleNav(-1)">‹</button>
+    <span class="cycle-month" id="cycle-month-label"></span>
+    <button class="btn-outline" onclick="cycleNav(1)">›</button>
+  </div>
+  <div class="cycle-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#C4704A"></div>Menstrual</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4A8A6F"></div>Follicular</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#D4A843"></div>Ovulatory</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#9B7EC8"></div>Luteal</div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="cycle-stats">
+    <div class="c-stat"><div class="c-stat-num" id="cs-logged">—</div><div class="c-stat-lbl">Days logged</div></div>
+    <div class="c-stat"><div class="c-stat-num" id="cs-day">—</div><div class="c-stat-lbl">Today day</div></div>
+    <div class="c-stat"><div class="c-stat-num" id="cs-phase">—</div><div class="c-stat-lbl">Phase</div></div>
+  </div>
+
+  <div class="cycle-entry-panel card" id="cycle-panel">
+    <div class="card-title" id="cycle-panel-title">Log cycle day</div>
+    <div class="two-col">
+      <div><div class="field-label">Cycle day #</div><input type="number" class="field-input" id="c-day-num" min="1" max="40" placeholder="e.g. 1"></div>
+      <div><div class="field-label">Phase</div>
+        <select class="field-input" id="c-phase">
+          <option value="">—</option>
+          <option>Menstrual</option><option>Follicular</option><option>Ovulatory</option><option>Luteal</option>
+        </select>
+      </div>
+    </div>
+    <div class="sym-title">Flow</div>
+    <div class="three-col" id="flow-grid" style="margin-bottom:12px"></div>
+    <div class="sym-title">Symptoms</div>
+    <div class="chip-grid" id="cycle-sym-grid" style="margin-bottom:12px"></div>
+    <div class="field-label">Notes</div>
+    <textarea class="field-input" id="c-notes" style="margin-bottom:12px" placeholder="How you feel today…"></textarea>
+    <div class="save-row">
+      <button class="btn-save" onclick="saveCycleEntry()">Save cycle day</button>
+      <span class="save-status" id="cycle-save-status">Saved ✓</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HISTORY ═══ -->
+<div class="view" id="view-history">
+  <div id="history-list"></div>
+</div>
+
+<!-- ═══ TRENDS ═══ -->
+<div class="view" id="view-trends">
+  <div id="trends-content"></div>
+</div>
+
+</main>
+
+<script>
+// ══ CONSTANTS ══
+const WINDOWS = ['< 4 h','4–6 h','6–8 h','8–10 h','> 10 h','Not sure'];
+const EFFECTS = ['Headache','Heart racing','Dry mouth','Nausea','Jaw tension','Trouble sleeping','Mood dip','Overstimulated'];
+const EXERCISE = ['Running','Strength','Mobility / yoga'];
+const FLOW = ['None','Light','Medium','Heavy','Spotting'];
+const CYCLE_SYMS = ['Cramps','Bloating','Breast tenderness','Headache','Brain fog','Low energy','Mood swings','Heightened focus'];
+const PHASES = ['Menstrual','Follicular','Ovulatory','Luteal'];
+const PHASE_COLORS = {
+  menstrual:  {bg:'#FDECEA',border:'#C4704A',text:'#C4704A'},
+  follicular: {bg:'#E8F4EE',border:'#4A8A6F',text:'#4A8A6F'},
+  ovulatory:  {bg:'#FBF5E6',border:'#D4A843',text:'#D4A843'},
+  luteal:     {bg:'#F0ECF8',border:'#9B7EC8',text:'#9B7EC8'},
+};
+const SCALE_KEYS = ['mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peak','rebound','appetite','sleep'];
+
+// ══ STATE ══
+let entries = {};
+let cycleEntries = {};
+let scaleVals = {};
+let selectedEffects = [];
+let selectedExercise = null;
+let selectedWindow = null;
+let cycleViewDate = new Date();
+let cycleSelectedDate = null;
+let cycleSymptoms = [];
+let cycleFlow = null;
+// history view/edit mode per date
+let histMode = {};
+
+// ══ STORAGE ══
+function load() {
+  try { entries = JSON.parse(localStorage.getItem('el_entries') || '{}'); } catch { entries = {}; }
+  try { cycleEntries = JSON.parse(localStorage.getItem('el_cycle') || '{}'); } catch { cycleEntries = {}; }
+}
+function saveEntries() { localStorage.setItem('el_entries', JSON.stringify(entries)); }
+function saveCycleEntries() { localStorage.setItem('el_cycle', JSON.stringify(cycleEntries)); }
+function getDose() { return localStorage.getItem('el_dose') || '10'; }
+function setDoseStorage(v) { localStorage.setItem('el_dose', v); }
+function getStartDate() {
+  let sd = localStorage.getItem('el_start');
+  if (!sd) { sd = todayStr(); localStorage.setItem('el_start', sd); }
+  return sd;
+}
+
+// ══ UTILS ══
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function fmtDate(s) {
+  if (!s) return '—';
+  return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtDateShort(s) {
+  if (!s) return '—';
+  return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+function flash(id) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+function v(id) { return document.getElementById(id); }
+
+// ══ INIT ══
+function init() {
+  load();
+  // Render static chip grids
+  renderChipGrid('window-grid', WINDOWS, 'window', 'accent', true);
+  renderChipGrid('effects-grid', EFFECTS, 'effect', 'warn', false);
+  renderChipGrid('exercise-grid', EXERCISE, 'exercise', 'good', true);
+  renderChipGrid('flow-grid', FLOW, 'flow', 'accent', true);
+  renderChipGrid('cycle-sym-grid', CYCLE_SYMS, 'csym', 'warn', false);
+
+  // Dose badge
+  const dose = getDose();
+  v('dose-label').textContent = dose + ' mg / day';
+  v('dose-input').value = dose;
+
+  // Start date
+  v('start-display').textContent = fmtDate(getStartDate());
+
+  // Log date
+  v('log-date').value = todayStr();
+  updateLogDateLabel();
+  loadEntryIntoForm(todayStr());
+
+  // Click outside to close dose popup
+  document.addEventListener('click', e => {
+    const badge = v('dose-badge');
+    if (!badge.contains(e.target)) v('dose-popup').classList.remove('open');
+  });
+}
+
+// ══ CHIP GRID RENDERER ══
+function renderChipGrid(gridId, items, type, colorClass, single) {
+  const grid = v(gridId);
+  if (!grid) return;
+  grid.innerHTML = items.map(item => `
+    <div class="chip${single?' center':''}" data-type="${type}" data-val="${item}"
+      onclick="toggleChip(this,'${type}','${item}','${colorClass}',${single})">
+      ${single ? '' : '<span class="cdot"></span>'}${item}
+    </div>
+  `).join('');
+}
+
+function toggleChip(el, type, val, colorClass, single) {
+  if (single) {
+    // deselect all of same type first
+    document.querySelectorAll(`.chip[data-type="${type}"]`).forEach(c => c.className = c.className.replace(/ ?(warn|accent|good)-on/g,''));
+    if (getChipSelected(type) === val) {
+      setChipSelected(type, null);
+    } else {
+      el.classList.add(colorClass+'-on');
+      setChipSelected(type, val);
+    }
+  } else {
+    const active = el.classList.contains(colorClass+'-on');
+    el.classList.toggle(colorClass+'-on');
+    toggleMultiChip(type, val, !active);
+  }
+}
+
+function getChipSelected(type) {
+  if (type === 'window') return selectedWindow;
+  if (type === 'exercise') return selectedExercise;
+  if (type === 'flow') return cycleFlow;
+  return null;
+}
+function setChipSelected(type, val) {
+  if (type === 'window') selectedWindow = val;
+  if (type === 'exercise') selectedExercise = val;
+  if (type === 'flow') cycleFlow = val;
+}
+function toggleMultiChip(type, val, add) {
+  if (type === 'effect') {
+    selectedEffects = add ? [...selectedEffects, val] : selectedEffects.filter(x=>x!==val);
+  }
+  if (type === 'csym') {
+    cycleSymptoms = add ? [...cycleSymptoms, val] : cycleSymptoms.filter(x=>x!==val);
+  }
+}
+
+// ══ SCALES ══
+function setScale(key, val) {
+  scaleVals[key] = parseInt(val);
+  const el = v('v-'+key);
+  if (el) { el.textContent = val; el.classList.remove('empty'); }
+}
+
+function resetScales() {
+  SCALE_KEYS.forEach(k => {
+    scaleVals[k] = null;
+    const el = v('v-'+k);
+    if (el) { el.textContent = '—'; el.classList.add('empty'); }
+    const sl = v('s-'+k);
+    if (sl) sl.value = 5;
+  });
+}
+
+// ══ LOG FORM ══
+function onDateChange() {
+  updateLogDateLabel();
+  loadEntryIntoForm(v('log-date').value);
+}
+
+function updateLogDateLabel() {
+  v('log-date-label').textContent = fmtDate(v('log-date').value);
+}
+
+function resetForm() {
+  ['l-dose','l-dose-time','l-onset','l-peak-from','l-peak-to','l-peak-notes',
+   'l-rebound-time','l-rebound-notes','l-exercise-min','l-screen','l-notes'].forEach(id => {
+    const el = v(id); if (el) el.value = '';
+  });
+  v('l-dose').value = getDose();
+  v('l-cycle-day').value = '';
+  v('l-cycle-phase').value = '';
+  resetScales();
+  // reset chips
+  document.querySelectorAll('.chip[data-type]').forEach(c => {
+    c.className = c.className.replace(/ ?(warn|accent|good)-on/g,'');
+  });
+  selectedEffects = []; selectedExercise = null; selectedWindow = null;
+}
+
+function loadEntryIntoForm(date) {
+  resetForm();
+  const e = entries[date];
+  if (!e) return;
+  if (e.dose) v('l-dose').value = e.dose;
+  if (e.doseTime) v('l-dose-time').value = e.doseTime;
+  if (e.onsetTime) v('l-onset').value = e.onsetTime;
+  if (e.peakFrom) v('l-peak-from').value = e.peakFrom;
+  if (e.peakTo) v('l-peak-to').value = e.peakTo;
+  if (e.peakNotes) v('l-peak-notes').value = e.peakNotes;
+  if (e.reboundTime) v('l-rebound-time').value = e.reboundTime;
+  if (e.reboundNotes) v('l-rebound-notes').value = e.reboundNotes;
+  if (e.exerciseMin) v('l-exercise-min').value = e.exerciseMin;
+  if (e.screenHrs) v('l-screen').value = e.screenHrs;
+  if (e.notes) v('l-notes').value = e.notes;
+  if (e.cycleDay) v('l-cycle-day').value = e.cycleDay;
+  if (e.cyclePhase) v('l-cycle-phase').value = e.cyclePhase;
+  // scales
+  SCALE_KEYS.forEach(k => {
+    if (e[k] != null) {
+      scaleVals[k] = e[k];
+      const sl = v('s-'+k); if (sl) sl.value = e[k];
+      const vl = v('v-'+k); if (vl) { vl.textContent = e[k]; vl.classList.remove('empty'); }
+    }
+  });
+  // effects
+  selectedEffects = e.effects ? [...e.effects] : [];
+  (e.effects||[]).forEach(ef => {
+    const chip = document.querySelector(`.chip[data-type="effect"][data-val="${ef}"]`);
+    if (chip) chip.classList.add('warn-on');
+  });
+  // exercise
+  if (e.exerciseType) {
+    selectedExercise = e.exerciseType;
+    const chip = document.querySelector(`.chip[data-type="exercise"][data-val="${e.exerciseType}"]`);
+    if (chip) chip.classList.add('good-on');
+  }
+  // window
+  if (e.window) {
+    selectedWindow = e.window;
+    const chip = document.querySelector(`.chip[data-type="window"][data-val="${e.window}"]`);
+    if (chip) chip.classList.add('accent-on');
+  }
+}
+
+function collectForm(date) {
+  return {
+    date,
+    dose: v('l-dose').value,
+    doseTime: v('l-dose-time').value,
+    onsetTime: v('l-onset').value,
+    window: selectedWindow || '',
+    'mood-am': scaleVals['mood-am'],
+    'energy-am': scaleVals['energy-am'],
+    'mood-pm': scaleVals['mood-pm'],
+    'energy-pm': scaleVals['energy-pm'],
+    focus: scaleVals['focus'],
+    anxiety: scaleVals['anxiety'],
+    peak: scaleVals['peak'],
+    rebound: scaleVals['rebound'],
+    appetite: scaleVals['appetite'],
+    sleep: scaleVals['sleep'],
+    peakFrom: v('l-peak-from').value,
+    peakTo: v('l-peak-to').value,
+    peakNotes: v('l-peak-notes').value.trim(),
+    reboundTime: v('l-rebound-time').value,
+    reboundNotes: v('l-rebound-notes').value.trim(),
+    effects: [...selectedEffects],
+    exerciseType: selectedExercise || '',
+    exerciseMin: v('l-exercise-min').value,
+    screenHrs: v('l-screen').value,
+    cycleDay: v('l-cycle-day').value,
+    cyclePhase: v('l-cycle-phase').value,
+    notes: v('l-notes').value.trim(),
+  };
+}
+
+function saveEntry() {
+  const date = v('log-date').value;
+  if (!date) return;
+  entries[date] = collectForm(date);
+  saveEntries();
+  flash('log-save-status');
+}
+
+// ══ DOSE POPUP ══
+function toggleDosePopup() {
+  v('dose-popup').classList.toggle('open');
+  v('dose-input').value = getDose();
+}
+function saveDose(evt) {
+  evt.stopPropagation();
+  const val = v('dose-input').value;
+  if (val && parseInt(val) > 0) {
+    setDoseStorage(val);
+    v('dose-label').textContent = val + ' mg / day';
+    v('l-dose').value = val;
+  }
+  v('dose-popup').classList.remove('open');
+}
+
+// ══ TABS ══
+function switchTab(name, btn) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+  v('view-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'trends') renderTrends();
+  if (name === 'cycle') renderCalendar();
+}
+
+// ══ HISTORY ══
+function renderHistory() {
+  const list = v('history-list');
+  const keys = Object.keys(entries).sort().reverse();
+  if (!keys.length) {
+    list.innerHTML = '<div class="hist-empty"><span class="big">📋</span>No entries yet.<br>Start from Log today.</div>';
+    return;
+  }
+  list.innerHTML = keys.map(date => {
+    const e = entries[date];
+    const pills = [
+      e.dose ? e.dose+'mg' : null,
+      e.doseTime ? '⏱ '+e.doseTime : null,
+      e.onsetTime ? 'onset '+e.onsetTime : null,
+      e['mood-am'] != null ? 'Mood AM '+e['mood-am'] : null,
+      e['mood-pm'] != null ? 'Mood PM '+e['mood-pm'] : null,
+      e.focus != null ? 'Focus '+e.focus : null,
+      e.peak != null ? 'Peak '+e.peak : null,
+      e.rebound != null ? 'Rebound '+e.rebound : null,
+      (e.effects||[]).length ? e.effects.length+' effects' : null,
+    ].filter(Boolean);
+
+    return `<div class="entry-card">
+      <div class="entry-header" onclick="toggleEntry('${date}')">
+        <span class="entry-date">${fmtDate(date)}</span>
+        <div class="entry-pills">${pills.map(p=>`<span class="mini-pill">${p}</span>`).join('')}</div>
+        <span class="entry-toggle" id="etoggle-${date}">▾</span>
+      </div>
+      <div class="entry-body" id="ebody-${date}">
+        <div class="view-edit-row">
+          <button class="btn-sm" id="hbtn-view-${date}" onclick="setHistMode('${date}','view')" style="background:var(--text);color:#fff;border-color:var(--text)">View</button>
+          <button class="btn-sm" id="hbtn-edit-${date}" onclick="setHistMode('${date}','edit')">Edit</button>
+          <button class="btn-delete" onclick="deleteEntry('${date}')">Delete</button>
+        </div>
+        <div id="hcontent-${date}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  // default mode
+  keys.forEach(date => {
+    if (!histMode[date]) histMode[date] = 'view';
+  });
+}
+
+function toggleEntry(date) {
+  const body = v('ebody-'+date);
+  const tog = v('etoggle-'+date);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  tog.textContent = isOpen ? '▾' : '▴';
+  if (!isOpen) renderHistContent(date);
+}
+
+function setHistMode(date, mode) {
+  histMode[date] = mode;
+  // update button styles
+  const vb = v('hbtn-view-'+date);
+  const eb = v('hbtn-edit-'+date);
+  if (mode === 'view') {
+    vb.style.background = 'var(--text)'; vb.style.color = '#fff'; vb.style.borderColor = 'var(--text)';
+    eb.style.background = ''; eb.style.color = ''; eb.style.borderColor = '';
+  } else {
+    eb.style.background = 'var(--text)'; eb.style.color = '#fff'; eb.style.borderColor = 'var(--text)';
+    vb.style.background = ''; vb.style.color = ''; vb.style.borderColor = '';
+  }
+  renderHistContent(date);
+}
+
+function renderHistContent(date) {
+  const container = v('hcontent-'+date);
+  const e = entries[date];
+  if (!e) return;
+  if ((histMode[date]||'view') === 'view') {
+    container.innerHTML = buildEntryReadView(e);
+  } else {
+    container.innerHTML = buildEntryEditForm(date, e);
+    loadInlineForm(date, e);
+  }
+}
+
+function buildEntryReadView(e) {
+  const ef = (label, val) => val != null && val !== '' ? `<div><div class="ef-label">${label}</div><div class="ef-val">${val}</div></div>` : '';
+  const peakStr = e.peakFrom ? `${e.peakFrom}${e.peakTo?'–'+e.peakTo:''}${e.peak!=null?' · '+e.peak+'/10':''}` : e.peak!=null ? e.peak+'/10' : null;
+  const rebStr = e.reboundTime ? `${e.reboundTime}${e.rebound!=null?' · '+e.rebound+'/10':''}` : e.rebound!=null ? e.rebound+'/10' : null;
+  return `<div class="entry-grid">
+    ${ef('Dose', e.dose ? e.dose+'mg' : null)}
+    ${ef('Dose at', e.doseTime)}
+    ${ef('Onset at', e.onsetTime)}
+    ${ef('Window', e.window)}
+    ${ef('Mood AM', e['mood-am']!=null ? e['mood-am']+'/10' : null)}
+    ${ef('Energy AM', e['energy-am']!=null ? e['energy-am']+'/10' : null)}
+    ${ef('Mood PM', e['mood-pm']!=null ? e['mood-pm']+'/10' : null)}
+    ${ef('Energy PM', e['energy-pm']!=null ? e['energy-pm']+'/10' : null)}
+    ${ef('Focus', e.focus!=null ? e.focus+'/10' : null)}
+    ${ef('Anxiety', e.anxiety!=null ? e.anxiety+'/10' : null)}
+    ${ef('Peak', peakStr)}
+    ${ef('Rebound', rebStr)}
+    ${ef('Appetite', e.appetite!=null ? e.appetite+'/10' : null)}
+    ${ef('Sleep', e.sleep!=null ? e.sleep+'/10' : null)}
+    ${ef('Exercise', e.exerciseType ? e.exerciseType+(e.exerciseMin?' · '+e.exerciseMin+'min':'') : e.exerciseMin ? e.exerciseMin+'min' : null)}
+    ${ef('Screen', e.screenHrs ? e.screenHrs+'h' : null)}
+    ${ef('Cycle', e.cycleDay ? 'Day '+e.cycleDay+(e.cyclePhase?' · '+e.cyclePhase:'') : e.cyclePhase||null)}
+    ${(e.effects||[]).length ? `<div style="grid-column:1/-1">${ef('Side effects', e.effects.join(', '))}</div>` : ''}
+  </div>
+  ${e.peakNotes ? `<div class="entry-note peak-note" style="margin-top:8px"><span class="note-type" style="color:var(--peak)">Peak</span>${e.peakNotes}</div>` : ''}
+  ${e.reboundNotes ? `<div class="entry-note rebound-note" style="margin-top:6px"><span class="note-type" style="color:var(--rebound)">Rebound</span>${e.reboundNotes}</div>` : ''}
+  ${e.notes ? `<div class="entry-note" style="margin-top:8px">${e.notes}</div>` : ''}`;
+}
+
+function buildEntryEditForm(date, e) {
+  const winOpts = WINDOWS.map(w => `<div class="chip center" data-htype="window-${date}" data-val="${w}" onclick="hToggleSingle(this,'window','${date}')">${w}</div>`).join('');
+  const exOpts = EXERCISE.map(t => `<div class="chip center" data-htype="exercise-${date}" data-val="${t}" onclick="hToggleSingle(this,'exercise','${date}')"><span class="cdot"></span>${t}</div>`).join('');
+  const effOpts = EFFECTS.map(ef => `<div class="chip" data-htype="effect-${date}" data-val="${ef}" onclick="hToggleMulti(this,'effect','${date}')"><span class="cdot"></span>${ef}</div>`).join('');
+  const phOpts = `<option value="">—</option>${PHASES.map(p=>`<option>${p}</option>`).join('')}`;
+  const scaleRows = [
+    ['mood-am','Mood AM','low','elevated',''],['energy-am','Energy AM','depleted','high',''],
+    ['mood-pm','Mood PM','low','elevated',''],['energy-pm','Energy PM','depleted','high',''],
+    ['focus','Focus','scattered','locked in',''],['anxiety','Anxiety','calm','anxious','var(--warn)'],
+    ['peak','Peak quality','weak','strong','var(--peak)'],['rebound','Rebound','mild','rough','var(--rebound)'],
+    ['appetite','Appetite','none','normal',''],['sleep','Sleep','awful','great',''],
+  ].map(([k,l,lo,hi,color]) => `
+    <div class="scale-group">
+      <div class="scale-header"><span class="scale-label">${l}</span><span class="scale-val empty" id="hv-${k}-${date}">—</span></div>
+      <input type="range" min="1" max="10" id="hs-${k}-${date}" oninput="hSetScale('${k}','${date}',this.value)"${color?` style="accent-color:${color}"`:''}> 
+      <div class="scale-ticks"><span class="scale-tick">${lo}</span><span class="scale-tick">5</span><span class="scale-tick">${hi}</span></div>
+    </div>`).join('');
+  return `
+    <div style="font-size:13px">
+      <div class="two-col"><div><div class="field-label">Dose (mg)</div><input type="number" class="field-input" id="he-dose-${date}" min="5" max="70" step="5"></div>
+        <div><div class="field-label">Dose at</div><input type="time" class="field-input" id="he-dose-time-${date}"></div></div>
+      <div class="two-col"><div><div class="field-label">Onset at</div><input type="time" class="field-input" id="he-onset-${date}"></div><div></div></div>
+      <div class="field-label" style="margin-bottom:8px">Window</div>
+      <div class="three-col" id="hwin-${date}" style="margin-bottom:12px">${winOpts}</div>
+      ${scaleRows}
+      <div class="two-col" style="margin-top:4px">
+        <div><div class="field-label">Peak from</div><input type="time" class="field-input" id="he-peak-from-${date}"></div>
+        <div><div class="field-label">Peak until</div><input type="time" class="field-input" id="he-peak-to-${date}"></div>
+      </div>
+      <div style="margin-bottom:8px"><div class="field-label">Peak notes</div><textarea class="field-input" id="he-peak-notes-${date}" style="min-height:50px"></textarea></div>
+      <div class="two-col"><div><div class="field-label">Rebound at</div><input type="time" class="field-input" id="he-rebound-time-${date}"></div><div></div></div>
+      <div style="margin-bottom:8px"><div class="field-label">Rebound notes</div><textarea class="field-input" id="he-rebound-notes-${date}" style="min-height:50px"></textarea></div>
+      <div class="field-label" style="margin-bottom:8px">Side effects</div>
+      <div class="chip-grid" id="heff-${date}" style="margin-bottom:12px">${effOpts}</div>
+      <div class="field-label" style="margin-bottom:8px">Exercise</div>
+      <div class="three-col" id="hex-${date}" style="margin-bottom:12px">${exOpts}</div>
+      <div class="two-col" style="margin-bottom:8px">
+        <div><div class="field-label">Duration (min)</div><input type="number" class="field-input" id="he-ex-min-${date}"></div>
+        <div><div class="field-label">Screen (hrs)</div><input type="number" class="field-input" id="he-screen-${date}" step="0.5"></div>
+      </div>
+      <div class="two-col" style="margin-bottom:8px">
+        <div><div class="field-label">Cycle day</div><input type="number" class="field-input" id="he-cday-${date}" min="1" max="40"></div>
+        <div><div class="field-label">Phase</div><select class="field-input" id="he-cphase-${date}">${phOpts}</select></div>
+      </div>
+      <div style="margin-bottom:12px"><div class="field-label">Notes</div><textarea class="field-input" id="he-notes-${date}" style="min-height:60px"></textarea></div>
+      <button class="btn-save" onclick="saveInlineEntry('${date}')">Save changes</button>
+      <span class="save-status" id="he-status-${date}" style="margin-left:10px">Saved ✓</span>
+    </div>`;
+}
+
+// inline edit state per date
+const hScaleVals = {};
+const hSelEffects = {};
+const hSelExercise = {};
+const hSelWindow = {};
+
+function loadInlineForm(date, e) {
+  hScaleVals[date] = {};
+  hSelEffects[date] = [...(e.effects||[])];
+  hSelExercise[date] = e.exerciseType||null;
+  hSelWindow[date] = e.window||null;
+
+  const gv = id => { const el = v(id); if (el) el.value = e[id.replace(`he-`,'').replace(`-${date}`,'').replace(/-([a-z])/g, (_,c)=>c.toUpperCase())] || ''; };
+  if (v(`he-dose-${date}`)) v(`he-dose-${date}`).value = e.dose||'';
+  if (v(`he-dose-time-${date}`)) v(`he-dose-time-${date}`).value = e.doseTime||'';
+  if (v(`he-onset-${date}`)) v(`he-onset-${date}`).value = e.onsetTime||'';
+  if (v(`he-peak-from-${date}`)) v(`he-peak-from-${date}`).value = e.peakFrom||'';
+  if (v(`he-peak-to-${date}`)) v(`he-peak-to-${date}`).value = e.peakTo||'';
+  if (v(`he-peak-notes-${date}`)) v(`he-peak-notes-${date}`).value = e.peakNotes||'';
+  if (v(`he-rebound-time-${date}`)) v(`he-rebound-time-${date}`).value = e.reboundTime||'';
+  if (v(`he-rebound-notes-${date}`)) v(`he-rebound-notes-${date}`).value = e.reboundNotes||'';
+  if (v(`he-ex-min-${date}`)) v(`he-ex-min-${date}`).value = e.exerciseMin||'';
+  if (v(`he-screen-${date}`)) v(`he-screen-${date}`).value = e.screenHrs||'';
+  if (v(`he-cday-${date}`)) v(`he-cday-${date}`).value = e.cycleDay||'';
+  if (v(`he-cphase-${date}`)) v(`he-cphase-${date}`).value = e.cyclePhase||'';
+  if (v(`he-notes-${date}`)) v(`he-notes-${date}`).value = e.notes||'';
+
+  // scales
+  const SCALE_KEYS2 = ['mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peak','rebound','appetite','sleep'];
+  SCALE_KEYS2.forEach(k => {
+    const val = e[k];
+    hScaleVals[date][k] = val;
+    const sl = v(`hs-${k}-${date}`);
+    const vl = v(`hv-${k}-${date}`);
+    if (sl && val != null) sl.value = val;
+    if (vl) { vl.textContent = val != null ? val : '—'; if (val!=null) vl.classList.remove('empty'); }
+  });
+
+  // window
+  if (e.window) {
+    document.querySelectorAll(`[data-htype="window-${date}"]`).forEach(c => {
+      if (c.dataset.val === e.window) c.classList.add('accent-on');
+    });
+  }
+  // effects
+  (e.effects||[]).forEach(ef => {
+    const chip = document.querySelector(`[data-htype="effect-${date}"][data-val="${ef}"]`);
+    if (chip) chip.classList.add('warn-on');
+  });
+  // exercise
+  if (e.exerciseType) {
+    const chip = document.querySelector(`[data-htype="exercise-${date}"][data-val="${e.exerciseType}"]`);
+    if (chip) chip.classList.add('good-on');
+  }
+}
+
+function hSetScale(key, date, val) {
+  if (!hScaleVals[date]) hScaleVals[date] = {};
+  hScaleVals[date][key] = parseInt(val);
+  const el = v(`hv-${key}-${date}`);
+  if (el) { el.textContent = val; el.classList.remove('empty'); }
+}
+
+function hToggleSingle(el, type, date) {
+  const htype = type+'-'+date;
+  document.querySelectorAll(`[data-htype="${htype}"]`).forEach(c => c.className = c.className.replace(/ ?(warn|accent|good)-on/g,''));
+  const cur = type === 'window' ? hSelWindow[date] : hSelExercise[date];
+  const val = el.dataset.val;
+  if (cur === val) {
+    if (type === 'window') hSelWindow[date] = null;
+    else hSelExercise[date] = null;
+  } else {
+    const cls = type === 'window' ? 'accent-on' : 'good-on';
+    el.classList.add(cls);
+    if (type === 'window') hSelWindow[date] = val;
+    else hSelExercise[date] = val;
+  }
+}
+
+function hToggleMulti(el, type, date) {
+  const val = el.dataset.val;
+  const active = el.classList.contains('warn-on');
+  el.classList.toggle('warn-on');
+  if (!hSelEffects[date]) hSelEffects[date] = [];
+  hSelEffects[date] = active ? hSelEffects[date].filter(x=>x!==val) : [...hSelEffects[date], val];
+}
+
+function saveInlineEntry(date) {
+  const getVal = id => { const el = v(id); return el ? el.value : ''; };
+  const updated = {
+    date,
+    dose: getVal(`he-dose-${date}`),
+    doseTime: getVal(`he-dose-time-${date}`),
+    onsetTime: getVal(`he-onset-${date}`),
+    window: hSelWindow[date]||'',
+    peakFrom: getVal(`he-peak-from-${date}`),
+    peakTo: getVal(`he-peak-to-${date}`),
+    peakNotes: getVal(`he-peak-notes-${date}`),
+    reboundTime: getVal(`he-rebound-time-${date}`),
+    reboundNotes: getVal(`he-rebound-notes-${date}`),
+    exerciseType: hSelExercise[date]||'',
+    exerciseMin: getVal(`he-ex-min-${date}`),
+    screenHrs: getVal(`he-screen-${date}`),
+    cycleDay: getVal(`he-cday-${date}`),
+    cyclePhase: getVal(`he-cphase-${date}`),
+    notes: getVal(`he-notes-${date}`),
+    effects: [...(hSelEffects[date]||[])],
+    ...(hScaleVals[date]||{}),
+  };
+  entries[date] = updated;
+  saveEntries();
+  flash(`he-status-${date}`);
+}
+
+function deleteEntry(date) {
+  if (!confirm('Delete entry for '+fmtDate(date)+'?')) return;
+  delete entries[date];
+  saveEntries();
+  renderHistory();
+}
+
+// ══ CYCLE ══
+function renderCalendar() {
+  const y = cycleViewDate.getFullYear();
+  const m = cycleViewDate.getMonth();
+  v('cycle-month-label').textContent = new Date(y,m,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  const today = todayStr();
+  const firstDay = new Date(y,m,1);
+  const startOffset = (firstDay.getDay()+6)%7;
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const prevDays = new Date(y,m,0).getDate();
+
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = dayNames.map(d=>`<div class="cal-dayname">${d}</div>`).join('');
+
+  // prev month padding
+  for (let i=startOffset-1;i>=0;i--) html += `<div class="cal-cell other-month">${prevDays-i}</div>`;
+
+  // this month
+  for (let d=1;d<=daysInMonth;d++) {
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const ce = cycleEntries[ds];
+    const ee = entries[ds];
+    // Determine phase from cycle entry first, then elvanse entry
+    const phaseRaw = ce?.phase || ee?.cyclePhase || '';
+    const phaseKey = phaseRaw.toLowerCase();
+    const hasData = !!(ce || ee?.cycleDay || ee?.cyclePhase);
+    let cls = 'cal-cell';
+    if (ds === today) cls += ' today';
+    if (ds === cycleSelectedDate) cls += ' selected';
+    if (phaseKey && PHASE_COLORS[phaseKey]) cls += ' phase-'+phaseKey;
+    const dot = hasData ? '<div class="cdot2"></div>' : '';
+    html += `<div class="${cls}" onclick="openCycleDay('${ds}')">${d}${dot}</div>`;
+  }
+
+  // fill end
+  const total = startOffset + daysInMonth;
+  const rem = total%7===0?0:7-(total%7);
+  for (let i=1;i<=rem;i++) html += `<div class="cal-cell other-month">${i}</div>`;
+
+  v('cal-grid').innerHTML = html;
+  updateCycleStats();
+}
+
+function cycleNav(dir) {
+  cycleViewDate = new Date(cycleViewDate.getFullYear(), cycleViewDate.getMonth()+dir, 1);
+  renderCalendar();
+}
+
+function openCycleDay(ds) {
+  cycleSelectedDate = ds;
+  const panel = v('cycle-panel');
+  panel.classList.add('open');
+  v('cycle-panel-title').textContent = fmtDate(ds);
+  // reset
+  v('c-day-num').value = '';
+  v('c-phase').value = '';
+  v('c-notes').value = '';
+  cycleSymptoms = []; cycleFlow = null;
+  document.querySelectorAll('#flow-grid .chip, #cycle-sym-grid .chip').forEach(c => {
+    c.className = c.className.replace(/ ?(warn|accent|good)-on/g,'');
+  });
+
+  const ce = cycleEntries[ds];
+  const ee = entries[ds];
+  if (ce) {
+    if (ce.dayNum) v('c-day-num').value = ce.dayNum;
+    if (ce.phase) v('c-phase').value = ce.phase;
+    if (ce.notes) v('c-notes').value = ce.notes;
+    cycleSymptoms = [...(ce.symptoms||[])];
+    cycleFlow = ce.flow||null;
+    (ce.symptoms||[]).forEach(s => {
+      const chip = document.querySelector(`#cycle-sym-grid .chip[data-val="${s}"]`);
+      if (chip) chip.classList.add('warn-on');
+    });
+    if (ce.flow) {
+      const chip = document.querySelector(`#flow-grid .chip[data-val="${ce.flow}"]`);
+      if (chip) chip.classList.add('accent-on');
+    }
+  } else if (ee) {
+    if (ee.cycleDay) v('c-day-num').value = ee.cycleDay;
+    if (ee.cyclePhase) v('c-phase').value = ee.cyclePhase;
+  }
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  renderCalendar();
+}
+
+function saveCycleEntry() {
+  if (!cycleSelectedDate) return;
+  cycleEntries[cycleSelectedDate] = {
+    date: cycleSelectedDate,
+    dayNum: v('c-day-num').value,
+    phase: v('c-phase').value,
+    symptoms: [...cycleSymptoms],
+    flow: cycleFlow||'',
+    notes: v('c-notes').value.trim(),
+  };
+  saveCycleEntries();
+  flash('cycle-save-status');
+  renderCalendar();
+}
+
+function updateCycleStats() {
+  const today = todayStr();
+  v('cs-logged').textContent = Object.keys(cycleEntries).length || '—';
+  const todayCE = cycleEntries[today];
+  const todayEE = entries[today];
+  v('cs-day').textContent = todayCE?.dayNum || todayEE?.cycleDay || '—';
+  const phase = todayCE?.phase || todayEE?.cyclePhase || '';
+  v('cs-phase').textContent = phase ? phase.slice(0,3) : '—';
+}
+
+// ══ TRENDS ══
+function renderTrends() {
+  const container = v('trends-content');
+  const keys = Object.keys(entries).sort();
+  if (keys.length < 2) {
+    container.innerHTML = '<div class="card"><p class="no-data">Log at least 2 days to see trends.</p></div>';
+    return;
+  }
+  const recent = keys.slice(-7);
+  const avg = arr => { const x=arr.filter(v=>v!=null); return x.length?(x.reduce((a,b)=>a+b,0)/x.length).toFixed(1):'—'; };
+
+  const metrics = [
+    {key:'mood-am',label:'Mood — morning',color:'#4A8A6F'},
+    {key:'mood-pm',label:'Mood — evening',color:'#9B7EC8'},
+    {key:'energy-am',label:'Energy — morning',color:'#4A6FA5'},
+    {key:'energy-pm',label:'Energy — evening',color:'#5B8FA8'},
+    {key:'focus',label:'Focus',color:'#4A6FA5'},
+    {key:'anxiety',label:'Anxiety',color:'#C4704A'},
+    {key:'peak',label:'Peak quality',color:'#D4A843'},
+    {key:'rebound',label:'Rebound severity',color:'#A05070'},
+    {key:'appetite',label:'Appetite',color:'#9B7EC8'},
+    {key:'sleep',label:'Sleep',color:'#5B8FA8'},
+  ];
+
+  const effectCount = {};
+  keys.forEach(k=>(entries[k].effects||[]).forEach(e=>{effectCount[e]=(effectCount[e]||0)+1;}));
+  const topEffects = Object.entries(effectCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+  let html = `<div class="stats-row">
+    <div class="stat-box"><div class="stat-num">${keys.length}</div><div class="stat-lbl">Days logged</div></div>
+    <div class="stat-box"><div class="stat-num">${avg(keys.map(k=>entries[k].focus))}</div><div class="stat-lbl">Avg focus</div></div>
+    <div class="stat-box"><div class="stat-num">${avg(keys.map(k=>entries[k].peak))}</div><div class="stat-lbl">Avg peak</div></div>
+  </div>`;
+
+  metrics.forEach(m => {
+    const vals = recent.map(k=>entries[k][m.key]);
+    if (!vals.some(x=>x!=null)) return;
+    html += `<div class="card" style="margin-bottom:10px">
+      <div class="trend-title">${m.label} — last ${recent.length} days</div>
+      <div class="bar-chart">
+        ${recent.map((k,i)=>{
+          const val=vals[i];
+          const h=val!=null?Math.round((val/10)*50):0;
+          return `<div class="bar-col">
+            <div class="bar" style="height:${h}px;background:${val!=null?m.color:'var(--border)'};opacity:${val!=null?.8:.3}" title="${val!=null?val+'/10':'—'}"></div>
+            <span class="bar-lbl">${fmtDateShort(k)}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  if (topEffects.length) {
+    html += `<div class="card" style="margin-bottom:10px">
+      <div class="card-title">Most common side effects</div>
+      ${topEffects.map(([n,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--surface-alt)"><span style="font-size:13px">${n}</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--warn)">${c}×</span></div>`).join('')}
+    </div>`;
+  }
+
+  html += `<button class="btn-outline" onclick="exportCSV()">Export CSV</button>`;
+  container.innerHTML = html;
+}
+
+function exportCSV() {
+  const keys = Object.keys(entries).sort();
+  const hdrs = ['date','dose','doseTime','onsetTime','window','mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peakFrom','peakTo','peak','peakNotes','reboundTime','rebound','reboundNotes','appetite','sleep','effects','exerciseType','exerciseMin','screenHrs','cycleDay','cyclePhase','notes'];
+  const rows = keys.map(k=>{const e=entries[k];return hdrs.map(h=>{let val=e[h]??'';if(Array.isArray(val))val=val.join('; ');return `"${String(val).replace(/"/g,'""')}"`}).join(',')});
+  const blob = new Blob([[hdrs.join(','),...rows].join('\n')],{type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='elvanse-tracker.csv'; a.click();
+}
+
+init();
+</script>
+</body>
+</html>
