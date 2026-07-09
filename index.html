@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elvanse Journal</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Elvanse">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0iIzFBMTkxNiIvPgogIDxyZWN0IHg9IjI4IiB5PSI1MiIgd2lkdGg9IjEyNCIgaGVpZ2h0PSIxMiIgcng9IjYiIGZpbGw9IiM5QjdFQzgiLz4KICA8cmVjdCB4PSIyOCIgeT0iNzYiIHdpZHRoPSI5MCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iIzRBNkZBNSIgb3BhY2l0eT0iMC44Ii8+CiAgPHJlY3QgeD0iMjgiIHk9Ijk2IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjNEE2RkE1IiBvcGFjaXR5PSIwLjYiLz4KICA8cmVjdCB4PSIyOCIgeT0iMTE2IiB3aWR0aD0iNzUiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiM0QTZGQTUiIG9wYWNpdHk9IjAuNCIvPgogIDxjaXJjbGUgY3g9IjEzOCIgY3k9IjEyNiIgcj0iMjQiIGZpbGw9IiNENEE4NDMiIG9wYWNpdHk9IjAuMTUiLz4KICA8Y2lyY2xlIGN4PSIxMzgiIGN5PSIxMjYiIHI9IjE2IiBmaWxsPSIjRDRBODQzIiBvcGFjaXR5PSIwLjMiLz4KICA8Y2lyY2xlIGN4PSIxMzgiIGN5PSIxMjYiIHI9IjgiIGZpbGw9IiNENEE4NDMiLz4KPC9zdmc+">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
 :root {
@@ -464,6 +468,18 @@ function fmtDateShort(s) {
   if (!s) return '—';
   return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 }
+
+function to12(val) {
+  if (!val) return '';
+  const parts = val.split(':');
+  if (parts.length < 2) return val;
+  let h = parseInt(parts[0]);
+  const m = parts[1];
+  if (isNaN(h)) return val;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return h12 + ':' + m + ' ' + ampm;
+}
 function flash(id) {
   const el = document.getElementById(id);
   el.classList.add('show');
@@ -559,9 +575,9 @@ function setScale(key, val) {
 
 function resetScales() {
   SCALE_KEYS.forEach(k => {
-    scaleVals[k] = null;
+    scaleVals[k] = 5;
     const el = v('v-'+k);
-    if (el) { el.textContent = '—'; el.classList.add('empty'); }
+    if (el) { el.textContent = '5'; el.classList.remove('empty'); }
     const sl = v('s-'+k);
     if (sl) sl.value = 5;
   });
@@ -700,6 +716,7 @@ function switchTab(name, btn) {
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   v('view-'+name).classList.add('active');
   btn.classList.add('active');
+  if (name === 'log') { v('log-date').value = todayStr(); updateLogDateLabel(); loadEntryIntoForm(todayStr()); }
   if (name === 'history') renderHistory();
   if (name === 'trends') renderTrends();
   if (name === 'cycle') renderCalendar();
@@ -717,8 +734,8 @@ function renderHistory() {
     const e = entries[date];
     const pills = [
       e.dose ? e.dose+'mg' : null,
-      e.doseTime ? '⏱ '+e.doseTime : null,
-      e.onsetTime ? 'onset '+e.onsetTime : null,
+      e.doseTime ? '⏱ '+to12(e.doseTime) : null,
+      e.onsetTime ? 'onset '+to12(e.onsetTime) : null,
       e['mood-am'] != null ? 'Mood AM '+e['mood-am'] : null,
       e['mood-pm'] != null ? 'Mood PM '+e['mood-pm'] : null,
       e.focus != null ? 'Focus '+e.focus : null,
@@ -736,7 +753,7 @@ function renderHistory() {
       <div class="entry-body" id="ebody-${date}">
         <div class="view-edit-row">
           <button class="btn-sm" id="hbtn-view-${date}" onclick="setHistMode('${date}','view')" style="background:var(--text);color:#fff;border-color:var(--text)">View</button>
-          <button class="btn-sm" id="hbtn-edit-${date}" onclick="setHistMode('${date}','edit')">Edit</button>
+          <button class="btn-sm" id="hbtn-edit-${date}" onclick="editEntry('${date}')">Edit</button>
           <button class="btn-delete" onclick="deleteEntry('${date}')">Delete</button>
         </div>
         <div id="hcontent-${date}"></div>
@@ -759,40 +776,39 @@ function toggleEntry(date) {
 }
 
 function setHistMode(date, mode) {
-  histMode[date] = mode;
-  // update button styles
+  histMode[date] = 'view';
   const vb = v('hbtn-view-'+date);
-  const eb = v('hbtn-edit-'+date);
-  if (mode === 'view') {
-    vb.style.background = 'var(--text)'; vb.style.color = '#fff'; vb.style.borderColor = 'var(--text)';
-    eb.style.background = ''; eb.style.color = ''; eb.style.borderColor = '';
-  } else {
-    eb.style.background = 'var(--text)'; eb.style.color = '#fff'; eb.style.borderColor = 'var(--text)';
-    vb.style.background = ''; vb.style.color = ''; vb.style.borderColor = '';
-  }
+  if (vb) { vb.style.background = 'var(--text)'; vb.style.color = '#fff'; vb.style.borderColor = 'var(--text)'; }
   renderHistContent(date);
+}
+
+function editEntry(date) {
+  // Switch to log tab with this date pre-loaded
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+  v('view-log').classList.add('active');
+  document.querySelector('nav button').classList.add('active');
+  v('log-date').value = date;
+  updateLogDateLabel();
+  loadEntryIntoForm(date);
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function renderHistContent(date) {
   const container = v('hcontent-'+date);
   const e = entries[date];
   if (!e) return;
-  if ((histMode[date]||'view') === 'view') {
-    container.innerHTML = buildEntryReadView(e);
-  } else {
-    container.innerHTML = buildEntryEditForm(date, e);
-    loadInlineForm(date, e);
-  }
+  container.innerHTML = buildEntryReadView(e);
 }
 
 function buildEntryReadView(e) {
   const ef = (label, val) => val != null && val !== '' ? `<div><div class="ef-label">${label}</div><div class="ef-val">${val}</div></div>` : '';
-  const peakStr = e.peakFrom ? `${e.peakFrom}${e.peakTo?'–'+e.peakTo:''}${e.peak!=null?' · '+e.peak+'/10':''}` : e.peak!=null ? e.peak+'/10' : null;
-  const rebStr = e.reboundTime ? `${e.reboundTime}${e.rebound!=null?' · '+e.rebound+'/10':''}` : e.rebound!=null ? e.rebound+'/10' : null;
+  const peakStr = e.peakFrom ? `${to12(e.peakFrom)}${e.peakTo?'–'+to12(e.peakTo):''}${e.peak!=null?' · '+e.peak+'/10':''}` : e.peak!=null ? e.peak+'/10' : null;
+  const rebStr = e.reboundTime ? `${to12(e.reboundTime)}${e.rebound!=null?' · '+e.rebound+'/10':''}` : e.rebound!=null ? e.rebound+'/10' : null;
   return `<div class="entry-grid">
     ${ef('Dose', e.dose ? e.dose+'mg' : null)}
-    ${ef('Dose at', e.doseTime)}
-    ${ef('Onset at', e.onsetTime)}
+    ${ef('Dose at', to12(e.doseTime))}
+    ${ef('Onset at', to12(e.onsetTime))}
     ${ef('Window', e.window)}
     ${ef('Mood AM', e['mood-am']!=null ? e['mood-am']+'/10' : null)}
     ${ef('Energy AM', e['energy-am']!=null ? e['energy-am']+'/10' : null)}
@@ -814,169 +830,6 @@ function buildEntryReadView(e) {
   ${e.notes ? `<div class="entry-note" style="margin-top:8px">${e.notes}</div>` : ''}`;
 }
 
-function buildEntryEditForm(date, e) {
-  const winOpts = WINDOWS.map(w => `<div class="chip center" data-htype="window-${date}" data-val="${w}" onclick="hToggleSingle(this,'window','${date}')">${w}</div>`).join('');
-  const exOpts = EXERCISE.map(t => `<div class="chip center" data-htype="exercise-${date}" data-val="${t}" onclick="hToggleSingle(this,'exercise','${date}')"><span class="cdot"></span>${t}</div>`).join('');
-  const effOpts = EFFECTS.map(ef => `<div class="chip" data-htype="effect-${date}" data-val="${ef}" onclick="hToggleMulti(this,'effect','${date}')"><span class="cdot"></span>${ef}</div>`).join('');
-  const phOpts = `<option value="">—</option>${PHASES.map(p=>`<option>${p}</option>`).join('')}`;
-  const scaleRows = [
-    ['mood-am','Mood AM','low','elevated',''],['energy-am','Energy AM','depleted','high',''],
-    ['mood-pm','Mood PM','low','elevated',''],['energy-pm','Energy PM','depleted','high',''],
-    ['focus','Focus','scattered','locked in',''],['anxiety','Anxiety','calm','anxious','var(--warn)'],
-    ['peak','Peak quality','weak','strong','var(--peak)'],['rebound','Rebound','mild','rough','var(--rebound)'],
-    ['appetite','Appetite','none','normal',''],['sleep','Sleep','awful','great',''],
-  ].map(([k,l,lo,hi,color]) => `
-    <div class="scale-group">
-      <div class="scale-header"><span class="scale-label">${l}</span><span class="scale-val empty" id="hv-${k}-${date}">—</span></div>
-      <input type="range" min="1" max="10" id="hs-${k}-${date}" oninput="hSetScale('${k}','${date}',this.value)"${color?` style="accent-color:${color}"`:''}> 
-      <div class="scale-ticks"><span class="scale-tick">${lo}</span><span class="scale-tick">5</span><span class="scale-tick">${hi}</span></div>
-    </div>`).join('');
-  return `
-    <div style="font-size:13px">
-      <div class="two-col"><div><div class="field-label">Dose (mg)</div><input type="number" class="field-input" id="he-dose-${date}" min="5" max="70" step="5"></div>
-        <div><div class="field-label">Dose at</div><input type="time" class="field-input" id="he-dose-time-${date}"></div></div>
-      <div class="two-col"><div><div class="field-label">Onset at</div><input type="time" class="field-input" id="he-onset-${date}"></div><div></div></div>
-      <div class="field-label" style="margin-bottom:8px">Window</div>
-      <div class="three-col" id="hwin-${date}" style="margin-bottom:12px">${winOpts}</div>
-      ${scaleRows}
-      <div class="two-col" style="margin-top:4px">
-        <div><div class="field-label">Peak from</div><input type="time" class="field-input" id="he-peak-from-${date}"></div>
-        <div><div class="field-label">Peak until</div><input type="time" class="field-input" id="he-peak-to-${date}"></div>
-      </div>
-      <div style="margin-bottom:8px"><div class="field-label">Peak notes</div><textarea class="field-input" id="he-peak-notes-${date}" style="min-height:50px"></textarea></div>
-      <div class="two-col"><div><div class="field-label">Rebound at</div><input type="time" class="field-input" id="he-rebound-time-${date}"></div><div></div></div>
-      <div style="margin-bottom:8px"><div class="field-label">Rebound notes</div><textarea class="field-input" id="he-rebound-notes-${date}" style="min-height:50px"></textarea></div>
-      <div class="field-label" style="margin-bottom:8px">Side effects</div>
-      <div class="chip-grid" id="heff-${date}" style="margin-bottom:12px">${effOpts}</div>
-      <div class="field-label" style="margin-bottom:8px">Exercise</div>
-      <div class="three-col" id="hex-${date}" style="margin-bottom:12px">${exOpts}</div>
-      <div class="two-col" style="margin-bottom:8px">
-        <div><div class="field-label">Duration (min)</div><input type="number" class="field-input" id="he-ex-min-${date}"></div>
-        <div><div class="field-label">Screen (hrs)</div><input type="number" class="field-input" id="he-screen-${date}" step="0.5"></div>
-      </div>
-      <div class="two-col" style="margin-bottom:8px">
-        <div><div class="field-label">Cycle day</div><input type="number" class="field-input" id="he-cday-${date}" min="1" max="40"></div>
-        <div><div class="field-label">Phase</div><select class="field-input" id="he-cphase-${date}">${phOpts}</select></div>
-      </div>
-      <div style="margin-bottom:12px"><div class="field-label">Notes</div><textarea class="field-input" id="he-notes-${date}" style="min-height:60px"></textarea></div>
-      <button class="btn-save" onclick="saveInlineEntry('${date}')">Save changes</button>
-      <span class="save-status" id="he-status-${date}" style="margin-left:10px">Saved ✓</span>
-    </div>`;
-}
-
-// inline edit state per date
-const hScaleVals = {};
-const hSelEffects = {};
-const hSelExercise = {};
-const hSelWindow = {};
-
-function loadInlineForm(date, e) {
-  hScaleVals[date] = {};
-  hSelEffects[date] = [...(e.effects||[])];
-  hSelExercise[date] = e.exerciseType||null;
-  hSelWindow[date] = e.window||null;
-
-  const gv = id => { const el = v(id); if (el) el.value = e[id.replace(`he-`,'').replace(`-${date}`,'').replace(/-([a-z])/g, (_,c)=>c.toUpperCase())] || ''; };
-  if (v(`he-dose-${date}`)) v(`he-dose-${date}`).value = e.dose||'';
-  if (v(`he-dose-time-${date}`)) v(`he-dose-time-${date}`).value = e.doseTime||'';
-  if (v(`he-onset-${date}`)) v(`he-onset-${date}`).value = e.onsetTime||'';
-  if (v(`he-peak-from-${date}`)) v(`he-peak-from-${date}`).value = e.peakFrom||'';
-  if (v(`he-peak-to-${date}`)) v(`he-peak-to-${date}`).value = e.peakTo||'';
-  if (v(`he-peak-notes-${date}`)) v(`he-peak-notes-${date}`).value = e.peakNotes||'';
-  if (v(`he-rebound-time-${date}`)) v(`he-rebound-time-${date}`).value = e.reboundTime||'';
-  if (v(`he-rebound-notes-${date}`)) v(`he-rebound-notes-${date}`).value = e.reboundNotes||'';
-  if (v(`he-ex-min-${date}`)) v(`he-ex-min-${date}`).value = e.exerciseMin||'';
-  if (v(`he-screen-${date}`)) v(`he-screen-${date}`).value = e.screenHrs||'';
-  if (v(`he-cday-${date}`)) v(`he-cday-${date}`).value = e.cycleDay||'';
-  if (v(`he-cphase-${date}`)) v(`he-cphase-${date}`).value = e.cyclePhase||'';
-  if (v(`he-notes-${date}`)) v(`he-notes-${date}`).value = e.notes||'';
-
-  // scales
-  const SCALE_KEYS2 = ['mood-am','energy-am','mood-pm','energy-pm','focus','anxiety','peak','rebound','appetite','sleep'];
-  SCALE_KEYS2.forEach(k => {
-    const val = e[k];
-    hScaleVals[date][k] = val;
-    const sl = v(`hs-${k}-${date}`);
-    const vl = v(`hv-${k}-${date}`);
-    if (sl && val != null) sl.value = val;
-    if (vl) { vl.textContent = val != null ? val : '—'; if (val!=null) vl.classList.remove('empty'); }
-  });
-
-  // window
-  if (e.window) {
-    document.querySelectorAll(`[data-htype="window-${date}"]`).forEach(c => {
-      if (c.dataset.val === e.window) c.classList.add('accent-on');
-    });
-  }
-  // effects
-  (e.effects||[]).forEach(ef => {
-    const chip = document.querySelector(`[data-htype="effect-${date}"][data-val="${ef}"]`);
-    if (chip) chip.classList.add('warn-on');
-  });
-  // exercise
-  if (e.exerciseType) {
-    const chip = document.querySelector(`[data-htype="exercise-${date}"][data-val="${e.exerciseType}"]`);
-    if (chip) chip.classList.add('good-on');
-  }
-}
-
-function hSetScale(key, date, val) {
-  if (!hScaleVals[date]) hScaleVals[date] = {};
-  hScaleVals[date][key] = parseInt(val);
-  const el = v(`hv-${key}-${date}`);
-  if (el) { el.textContent = val; el.classList.remove('empty'); }
-}
-
-function hToggleSingle(el, type, date) {
-  const htype = type+'-'+date;
-  document.querySelectorAll(`[data-htype="${htype}"]`).forEach(c => c.className = c.className.replace(/ ?(warn|accent|good)-on/g,''));
-  const cur = type === 'window' ? hSelWindow[date] : hSelExercise[date];
-  const val = el.dataset.val;
-  if (cur === val) {
-    if (type === 'window') hSelWindow[date] = null;
-    else hSelExercise[date] = null;
-  } else {
-    const cls = type === 'window' ? 'accent-on' : 'good-on';
-    el.classList.add(cls);
-    if (type === 'window') hSelWindow[date] = val;
-    else hSelExercise[date] = val;
-  }
-}
-
-function hToggleMulti(el, type, date) {
-  const val = el.dataset.val;
-  const active = el.classList.contains('warn-on');
-  el.classList.toggle('warn-on');
-  if (!hSelEffects[date]) hSelEffects[date] = [];
-  hSelEffects[date] = active ? hSelEffects[date].filter(x=>x!==val) : [...hSelEffects[date], val];
-}
-
-function saveInlineEntry(date) {
-  const getVal = id => { const el = v(id); return el ? el.value : ''; };
-  const updated = {
-    date,
-    dose: getVal(`he-dose-${date}`),
-    doseTime: getVal(`he-dose-time-${date}`),
-    onsetTime: getVal(`he-onset-${date}`),
-    window: hSelWindow[date]||'',
-    peakFrom: getVal(`he-peak-from-${date}`),
-    peakTo: getVal(`he-peak-to-${date}`),
-    peakNotes: getVal(`he-peak-notes-${date}`),
-    reboundTime: getVal(`he-rebound-time-${date}`),
-    reboundNotes: getVal(`he-rebound-notes-${date}`),
-    exerciseType: hSelExercise[date]||'',
-    exerciseMin: getVal(`he-ex-min-${date}`),
-    screenHrs: getVal(`he-screen-${date}`),
-    cycleDay: getVal(`he-cday-${date}`),
-    cyclePhase: getVal(`he-cphase-${date}`),
-    notes: getVal(`he-notes-${date}`),
-    effects: [...(hSelEffects[date]||[])],
-    ...(hScaleVals[date]||{}),
-  };
-  entries[date] = updated;
-  saveEntries();
-  flash(`he-status-${date}`);
-}
 
 function deleteEntry(date) {
   if (!confirm('Delete entry for '+fmtDate(date)+'?')) return;
