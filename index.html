@@ -625,6 +625,65 @@ function avg(arr) {
 }
 
 // INIT
+// CYCLE AUTO-CALCULATION
+// Based on Apple Health data: last period 23 Jun 2026, cycle 28 days, period 4 days
+const CYCLE_CONFIG = {
+  lastPeriodStart: '2026-06-23',
+  cycleLength: 28,
+  periodLength: 4,
+  // Phase boundaries (cycle day ranges, 1-indexed)
+  phases: [
+    { name: 'Menstrual',  start: 1,  end: 4  },
+    { name: 'Follicular', start: 5,  end: 13 },
+    { name: 'Ovulatory',  start: 14, end: 16 },
+    { name: 'Luteal',     start: 17, end: 28 },
+  ]
+};
+
+function getCycleInfoForDate(dateStr) {
+  const target = new Date(dateStr + 'T12:00:00');
+  const ref = new Date(CYCLE_CONFIG.lastPeriodStart + 'T12:00:00');
+  const diffDays = Math.round((target - ref) / 86400000);
+
+  if (diffDays < 0) {
+    // Before last known period — work backwards
+    const cyclesBack = Math.ceil(Math.abs(diffDays) / CYCLE_CONFIG.cycleLength);
+    const periodStart = new Date(ref);
+    periodStart.setDate(periodStart.getDate() - cyclesBack * CYCLE_CONFIG.cycleLength);
+    const dayInCycle = Math.round((target - periodStart) / 86400000) + 1;
+    return calcPhase(dayInCycle);
+  }
+
+  // Day within current/future cycle
+  const dayInCycle = (diffDays % CYCLE_CONFIG.cycleLength) + 1;
+  return calcPhase(dayInCycle);
+}
+
+function calcPhase(dayInCycle) {
+  const cl = CYCLE_CONFIG.cycleLength;
+  // Clamp to valid range
+  const day = Math.max(1, Math.min(dayInCycle, cl));
+  let phase = 'Luteal';
+  for (const p of CYCLE_CONFIG.phases) {
+    if (day >= p.start && day <= p.end) { phase = p.name; break; }
+  }
+  return { day, phase };
+}
+
+function autofillCycleForDate(dateStr) {
+  const info = getCycleInfoForDate(dateStr);
+  const dayEl = document.getElementById('l-cycle-day');
+  const phaseEl = document.getElementById('l-cycle-phase');
+  const hint = document.getElementById('cycle-auto-hint');
+  if (dayEl && !dayEl.value) dayEl.value = info.day;
+  if (phaseEl && !phaseEl.value) phaseEl.value = info.phase;
+  if (hint) hint.textContent = 'Auto-calculated — Day ' + info.day + ' · ' + info.phase + ' (edit if different)';
+}
+function clearCycleHint() {
+  const hint = document.getElementById('cycle-auto-hint');
+  if (hint) hint.textContent = '';
+}
+
 function init() {
   load();
   renderChipGrid('window-grid', WINDOWS, 'window', 'accent', true);
@@ -773,7 +832,13 @@ function saveQuickLog() {
 }
 
 // LOG FORM
-function onDateChange() { updateLogDateLabel(); loadEntryIntoForm(v('log-date').value); }
+function onDateChange() {
+  const date = v('log-date').value;
+  updateLogDateLabel();
+  loadEntryIntoForm(date);
+  // If no entry exists yet, auto-fill cycle day & phase
+  if (!entries[date]) autofillCycleForDate(date);
+}
 function updateLogDateLabel() { v('log-date-label').textContent = fmtDate(v('log-date').value); }
 
 function resetForm() {
@@ -1004,6 +1069,7 @@ function switchTab(name, btn) {
     v('log-date').value = todayStr();
     updateLogDateLabel();
     loadEntryIntoForm(todayStr());
+    if (!entries[todayStr()]) autofillCycleForDate(todayStr());
   }
   if (name === 'history') renderHistory();
   if (name === 'trends') renderTrends();
@@ -1285,8 +1351,10 @@ function updateCycleStats() {
   v('cs-logged').textContent = Object.keys(cycleEntries).length || '-';
   const todayCE = cycleEntries[today];
   const todayEE = entries[today];
-  v('cs-day').textContent = todayCE?.dayNum || todayEE?.cycleDay || '-';
-  const phase = todayCE?.phase || todayEE?.cyclePhase || '';
+  const autoInfo = getCycleInfoForDate(today);
+  const day = todayCE?.dayNum || todayEE?.cycleDay || autoInfo.day;
+  const phase = todayCE?.phase || todayEE?.cyclePhase || autoInfo.phase;
+  v('cs-day').textContent = day || '-';
   v('cs-phase').textContent = phase ? phase.slice(0,3) : '-';
 }
 
