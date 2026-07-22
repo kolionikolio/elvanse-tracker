@@ -459,8 +459,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         Rest day
       </div>
     </div>
-    <div id="exercise-duration" style="max-width:50%;padding-right:5px">
-      <div class="field-label">Duration (min)</div><input type="number" class="field-input" id="l-exercise-min" min="0" max="300" placeholder="0">
+    <div id="exercise-duration">
+      <div class="two-col" style="margin-bottom:10px">
+        <div><div class="field-label">Duration (min)</div><input type="number" class="field-input" id="l-exercise-min" min="0" max="300" placeholder="0"></div>
+        <div><div class="field-label">Time of day</div><div style="display:flex;align-items:center;gap:8px"><input type="time" class="field-input" id="l-exercise-time" oninput="updateTimeDisplay('l-exercise-time')"><span id="l-exercise-time-display" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--good);white-space:nowrap;min-width:70px"></span></div></div>
+      </div>
+      <div><div class="field-label">Exercise notes</div><input type="text" class="field-input" id="l-exercise-notes" placeholder="e.g. easy run, felt strong, heavy legs..."></div>
     </div>
   </div>
 
@@ -626,44 +630,56 @@ function avg(arr) {
 
 // INIT
 // CYCLE AUTO-CALCULATION
-// Based on Apple Health data: last period 23 Jun 2026, cycle 28 days, period 4 days
+// Anchor: last known period start. Only resets when user manually sets day 1.
 const CYCLE_CONFIG = {
-  lastPeriodStart: '2026-06-23',
-  cycleLength: 28,
+  lastPeriodStart: '2026-06-23', // from Apple Health — update when new cycle starts
   periodLength: 4,
-  // Phase boundaries (cycle day ranges, 1-indexed)
   phases: [
     { name: 'Menstrual',  start: 1,  end: 4  },
     { name: 'Follicular', start: 5,  end: 13 },
     { name: 'Ovulatory',  start: 14, end: 16 },
-    { name: 'Luteal',     start: 17, end: 28 },
+    { name: 'Luteal',     start: 17, end: 99 }, // extends until next period
   ]
 };
 
+function getLastPeriodStart() {
+  // Check if user has manually logged a day 1 more recently than the config anchor
+  // Scan entries for the most recent entry with cycleDay == 1
+  const keys = Object.keys(entries).sort();
+  let latest = CYCLE_CONFIG.lastPeriodStart;
+  for (const k of keys) {
+    const e = entries[k];
+    const cd = parseInt(e.cycleDay);
+    if (cd === 1 && k >= latest) latest = k;
+  }
+  // Also check cycleEntries
+  const ckeys = Object.keys(cycleEntries).sort();
+  for (const k of ckeys) {
+    const ce = cycleEntries[k];
+    const cd = parseInt(ce.dayNum);
+    if (cd === 1 && k >= latest) latest = k;
+  }
+  return latest;
+}
+
 function getCycleInfoForDate(dateStr) {
+  const periodStart = getLastPeriodStart();
   const target = new Date(dateStr + 'T12:00:00');
-  const ref = new Date(CYCLE_CONFIG.lastPeriodStart + 'T12:00:00');
+  const ref = new Date(periodStart + 'T12:00:00');
   const diffDays = Math.round((target - ref) / 86400000);
 
   if (diffDays < 0) {
-    // Before last known period — work backwards
-    const cyclesBack = Math.ceil(Math.abs(diffDays) / CYCLE_CONFIG.cycleLength);
-    const periodStart = new Date(ref);
-    periodStart.setDate(periodStart.getDate() - cyclesBack * CYCLE_CONFIG.cycleLength);
-    const dayInCycle = Math.round((target - periodStart) / 86400000) + 1;
-    return calcPhase(dayInCycle);
+    // Date is before last known period — can't reliably calculate, show unknown
+    return { day: null, phase: '' };
   }
 
-  // Day within current/future cycle
-  const dayInCycle = (diffDays % CYCLE_CONFIG.cycleLength) + 1;
-  return calcPhase(dayInCycle);
+  const day = diffDays + 1; // day 1 = period start date
+  return calcPhase(day);
 }
 
-function calcPhase(dayInCycle) {
-  const cl = CYCLE_CONFIG.cycleLength;
-  // Clamp to valid range
-  const day = Math.max(1, Math.min(dayInCycle, cl));
-  let phase = 'Luteal';
+function calcPhase(day) {
+  if (!day || day < 1) return { day: null, phase: '' };
+  let phase = 'Luteal'; // default if beyond all ranges
   for (const p of CYCLE_CONFIG.phases) {
     if (day >= p.start && day <= p.end) { phase = p.name; break; }
   }
@@ -672,17 +688,20 @@ function calcPhase(dayInCycle) {
 
 function autofillCycleForDate(dateStr) {
   const info = getCycleInfoForDate(dateStr);
-  const dayEl = document.getElementById('l-cycle-day');
-  const phaseEl = document.getElementById('l-cycle-phase');
-  const hint = document.getElementById('cycle-auto-hint');
+  if (!info.day) return; // before period start, don't guess
+  const dayEl = v('l-cycle-day');
+  const phaseEl = v('l-cycle-phase');
+  const hint = v('cycle-auto-hint');
   if (dayEl && !dayEl.value) dayEl.value = info.day;
   if (phaseEl && !phaseEl.value) phaseEl.value = info.phase;
   if (hint) hint.textContent = 'Auto-calculated — Day ' + info.day + ' · ' + info.phase + ' (edit if different)';
 }
+
 function clearCycleHint() {
-  const hint = document.getElementById('cycle-auto-hint');
+  const hint = v('cycle-auto-hint');
   if (hint) hint.textContent = '';
 }
+
 
 function init() {
   load();
@@ -843,7 +862,7 @@ function updateLogDateLabel() { v('log-date-label').textContent = fmtDate(v('log
 
 function resetForm() {
   ['l-dose','l-dose-time','l-onset','l-peak-from','l-peak-to','l-peak-notes',
-   'l-rebound-time','l-rebound-notes','l-exercise-min','l-notes'].forEach(id => {
+   'l-rebound-time','l-rebound-notes','l-exercise-min','l-exercise-time','l-exercise-notes','l-notes'].forEach(id => {
     const el = v(id); if (el) el.value = '';
   });
   v('l-dose').value = getDose();
@@ -948,6 +967,8 @@ function collectForm(date) {
     effects: [...selectedEffects],
     exerciseType: selectedExercise || '',
     exerciseMin: v('l-exercise-min').value,
+    exerciseTime: v('l-exercise-time') ? v('l-exercise-time').value : '',
+    exerciseNotes: v('l-exercise-notes') ? v('l-exercise-notes').value.trim() : '',
     cycleDay: v('l-cycle-day').value,
     cyclePhase: v('l-cycle-phase').value,
     notes: v('l-notes').value.trim(),
@@ -1016,7 +1037,7 @@ function updateTimeDisplay(id) {
   if (input && display) display.textContent = to12(input.value);
 }
 function updateAllTimeDisplays() {
-  ['l-dose-time','l-onset','l-peak-from','l-peak-to','l-rebound-time'].forEach(updateTimeDisplay);
+  ['l-dose-time','l-onset','l-peak-from','l-peak-to','l-rebound-time','l-exercise-time'].forEach(updateTimeDisplay);
 }
 
 // REST DAY
@@ -1351,10 +1372,11 @@ function updateCycleStats() {
   v('cs-logged').textContent = Object.keys(cycleEntries).length || '-';
   const todayCE = cycleEntries[today];
   const todayEE = entries[today];
+  // Prefer manually logged value, fall back to auto-calc
   const autoInfo = getCycleInfoForDate(today);
-  const day = todayCE?.dayNum || todayEE?.cycleDay || autoInfo.day;
-  const phase = todayCE?.phase || todayEE?.cyclePhase || autoInfo.phase;
-  v('cs-day').textContent = day || '-';
+  const day = todayCE?.dayNum || todayEE?.cycleDay || autoInfo.day || '-';
+  const phase = todayCE?.phase || todayEE?.cyclePhase || autoInfo.phase || '';
+  v('cs-day').textContent = day;
   v('cs-phase').textContent = phase ? phase.slice(0,3) : '-';
 }
 
@@ -1442,7 +1464,7 @@ function renderTrends() {
 
 function exportCSV() {
   const keys = Object.keys(entries).sort();
-  const hdrs = ['date','skipped','skipReason','dose','doseTime','onsetTime','window','mood-am','energy-am','mood-mid','energy-mid','mood-pm','energy-pm','focus','anxiety','peakFrom','peakTo','peak','peakNotes','reboundTime','rebound','reboundNotes','appetite','sleep','effects','exerciseType','exerciseMin','cycleDay','cyclePhase','notes'];
+  const hdrs = ['date','skipped','skipReason','dose','doseTime','onsetTime','window','mood-am','energy-am','mood-mid','energy-mid','mood-pm','energy-pm','focus','anxiety','peakFrom','peakTo','peak','peakNotes','reboundTime','rebound','reboundNotes','appetite','sleep','effects','exerciseType','exerciseMin','exerciseTime','exerciseNotes','cycleDay','cyclePhase','notes'];
   const rows = keys.map(k=>{const e=entries[k];return hdrs.map(h=>{let val=e[h]??'';if(Array.isArray(val))val=val.join('; ');return `"${String(val).replace(/"/g,'""')}"`}).join(',')});
   const blob = new Blob([[hdrs.join(','),...rows].join('\n')],{type:'text/csv'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='elvanse-tracker.csv'; a.click();
