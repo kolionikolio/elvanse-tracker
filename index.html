@@ -721,6 +721,7 @@ function init() {
   v('ql-date-label').textContent = fmtDate(todayStr());
   updateLogDateLabel();
   loadEntryIntoForm(todayStr());
+  if (!entries[todayStr()]) autofillCycleForDate(todayStr());
 
   document.addEventListener('click', e => {
     const badge = v('dose-badge');
